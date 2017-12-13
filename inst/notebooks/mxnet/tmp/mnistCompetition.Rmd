@@ -11,24 +11,53 @@ First, let us download the data from [here](https://www.kaggle.com/c/digit-recog
 
 Then we can read them in R and convert to matrices.
 
+
+
+```{r}
+require(mxnet)
+```
+
+## Option #1
+```{r}
+# read from files residing in the package
+extdata <- system.file("extdata", package = "rDeepThought")
+train <- read.csv(paste(extdata, "train_digits.csv", sep = "/"), header=TRUE)
+test  <- read.csv(paste(extdata, "test_digits.csv", sep = "/"), header=TRUE)
+
+# [1] 42000   785
+# [1] 28000   784
+```
+
+## Option ##2
+```{r}
+# Read from files in this folder
+train <- read.csv("train.csv", header=TRUE)
+test <- read.csv("test.csv", header=TRUE)
+```
+
+## Option #3
 ```{r, echo=FALSE}
 download.file('https://apache-mxnet.s3-accelerate.dualstack.amazonaws.com/R/data/mnist_csv.zip', destfile = 'mnist_csv.zip')
 unzip('mnist_csv.zip', exdir = '.')
 ```
 
-
+## Common: 
 ```{r}
-require(mxnet)
-train <- read.csv("train.csv", header=TRUE)
-test <- read.csv("test.csv", header=TRUE)
 train <- data.matrix(train)
 test <- data.matrix(test)
 
 train.x <- train[,-1]
 train.y <- train[,1]
+
+dim(train)
+dim(test)
 ```
 
+
+# Option #4: load the train and test sets
 Besides using the csv files from kaggle, you can also read the orginal MNIST dataset into R.
+
+> This is not necessary if you already have the train,csv and test.csv.
 
 ```{r, eval=FALSE}
 load_image_file <- function(filename) {
@@ -53,17 +82,23 @@ load_label_file <- function(filename) {
 }
 
 train.x <- load_image_file('mnist/train-images-idx3-ubyte')
-test.y <- load_image_file('mnist/t10k-images-idx3-ubyte')
+test.y  <- load_image_file('mnist/t10k-images-idx3-ubyte')
 
 train.y <- load_label_file('mnist/train-labels-idx1-ubyte')
-test.y <- load_label_file('mnist/t10k-labels-idx1-ubyte')
+test.y  <- load_label_file('mnist/t10k-labels-idx1-ubyte')
+
 ```
 
+
+### Normalization
 Here every image is represented as a single row in train/test. The greyscale of each image falls in the range [0, 255], we can linearly transform it into [0,1] by
 
 ```{r}
 train.x <- t(train.x/255)
 test <- t(test/255)
+
+dim(train.x)
+dim(test)
 ```
 We also transpose the input matrix to npixel x nexamples, which is the column major format accepted by mxnet (and the convention of R).
 
@@ -71,10 +106,11 @@ In the label part, we see the number of each digit is fairly even:
 
 ```{r}
 table(train.y)
+#    0    1    2    3    4    5    6    7    8    9 
+# 4132 4684 4177 4351 4072 3795 4137 4401 4063 4188 
 ```
 
 ## Network Configuration
-
 Now we have the data. The next step is to configure the structure of our network.
 
 ```{r}
@@ -112,14 +148,21 @@ softmax <- mx.symbol.Variable("data") %>%
 
 We are almost ready for the training process. Before we start the computation, let's decide what device should we use.
 
+### option #1: CPU
 ```{r}
 devices <- mx.cpu()
 ```
 
-Here we assign CPU to `mxnet`. After all these preparation, you can run the following command to train the neural network! Note that `mx.set.seed` is the correct function to control the random process in `mxnet`.
+### option #2: GPU
+```{r}
+devices <- mx.gpu()
+```
+
+Here we assign CPU or GPU to `mxnet`. After all these preparation, you can run the following command to train the neural network! Note that `mx.set.seed` is the correct function to control the random process in `mxnet`.
 
 ```{r}
 mx.set.seed(0)
+tic <- proc.time()
 model <- mx.model.FeedForward.create(softmax, X = train.x, y = train.y,
                                      ctx = devices, num.round = 5,
                                      array.batch.size = 100,
@@ -127,6 +170,13 @@ model <- mx.model.FeedForward.create(softmax, X = train.x, y = train.y,
                                      eval.metric = mx.metric.accuracy,
                                      initializer = mx.init.uniform(0.07),
                                      batch.end.callback = mx.callback.log.train.metric(100))
+print(proc.time() - tic)
+
+# GPU: [5] Train-accuracy=0.981500000000003
+   # user  system elapsed 
+   # 7.68    8.51    7.56 
+   # 7.47    9.00    7.31
+   # 7.67    8.75    7.19
 ```
 
 ## Prediction and Submission
@@ -136,6 +186,7 @@ To make prediction, we can simply write
 ```{r}
 preds <- predict(model, test)
 dim(preds)
+# [1]    10 28000
 ```
 
 It is a matrix with 28000 rows and 10 cols, containing the desired classification probabilities from the output layer. To extract the maximum label for each row, we can use the `max.col` in R:
@@ -143,7 +194,21 @@ It is a matrix with 28000 rows and 10 cols, containing the desired classificatio
 ```{r}
 pred.label <- max.col(t(preds)) - 1
 table(pred.label)
+#    0    1    2    3    4    5    6    7    8    9 
+# 2810 3201 2863 2864 2785 2485 2828 2783 2709 2672 
+
+# ----- GPU 
+
+#    0    1    2    3    4    5    6    7    8    9 
+# 2850 3205 2842 2765 2824 2518 2838 2741 2735 2682
+
+#    0    1    2    3    4    5    6    7    8    9 
+# 2850 3205 2842 2765 2824 2518 2838 2741 2735 2682 
+
 ```
+
+>  Why the difference?
+
 
 With a little extra effort in the csv format, we can have our submission to the competition!
 
@@ -151,6 +216,9 @@ With a little extra effort in the csv format, we can have our submission to the 
 submission <- data.frame(ImageId=1:ncol(test), Label=pred.label)
 write.csv(submission, file='submission.csv', row.names=FALSE, quote=FALSE)
 ```
+
+
+
 
 ## LeNet
 
@@ -183,7 +251,7 @@ fc2 <- mx.symbol.FullyConnected(data=tanh3, num_hidden=10)
 lenet <- mx.symbol.SoftmaxOutput(data=fc2)
 ```
 
-Then let us reshape the matrices into arrays:
+Then let us reshape the matrices (after normalization) into arrays:
 
 ```{r}
 train.array <- train.x
@@ -207,6 +275,8 @@ but since internal computation of cpu is already multi-threaded, there is less g
 
 We start by training on CPU first. Because it takes a bit time to do so, we will only run it for one iteration.
 
+### CPU
+
 ```{r}
 mx.set.seed(0)
 tic <- proc.time()
@@ -217,9 +287,11 @@ model <- mx.model.FeedForward.create(lenet, X = train.array, y = train.y,
                                      eval.metric = mx.metric.accuracy,
                                      batch.end.callback = mx.callback.log.train.metric(100))
 print(proc.time() - tic)
+ #   user  system elapsed 
+ # 146.65  141.76   50.92 
 ```
 
-Training on GPU:
+### Training on GPU
 
 ```{r}
 mx.set.seed(0)
@@ -227,10 +299,13 @@ tic <- proc.time()
 model <- mx.model.FeedForward.create(lenet, X = train.array, y = train.y,
                                      ctx = device.gpu, num.round = 5,
                                      array.batch.size = 100,
-                                     learning.rate = 0.05, momentum = 0.9, wd = 0.00001,
+                                     learning.rate = 0.05, momentum = 0.9, 
+                                     wd = 0.00001,
                                      eval.metric = mx.metric.accuracy,
                                      batch.end.callback = mx.callback.log.train.metric(100))
 print(proc.time() - tic)
+  #  user  system elapsed 
+  # 17.23   69.32   41.19 
 ```
 
 As you can see by using GPU, we can get a much faster speedup in training!
