@@ -10,3 +10,5 @@ inst/notebooks/mxnet/image_classification/cat\.rds
 *.html
 
 MNIST-data/
+
+inst/notebooks/mxnet/tmp/submission\.csv
