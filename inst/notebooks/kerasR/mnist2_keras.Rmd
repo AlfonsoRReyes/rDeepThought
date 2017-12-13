@@ -1,0 +1,162 @@
+---
+title: "MNIST Example"
+output: html_notebook
+---
+
+The Keras R interface uses the TensorFlow backend engine by default.
+
+We can learn the basics of Keras by walking through a simple example: recognizing handwritten digets from the MNIST dataset. MNIST consists of 28 x 28 grayscale images of handwritten digits like these:
+
+
+```{r, out.width = "200px"}
+knitr::include_graphics("https://keras.rstudio.com/images/MNIST.png")
+```
+
+
+## Preparing the Data
+The MNIST dataset is included with Keras and can be accessed using the dataset_mnist() function. Here we load the dataset then create variables for our test and training data:
+
+
+```{r}
+library(keras)
+
+mnist <- dataset_mnist()
+x_train <- mnist$train$x
+y_train <- mnist$train$y
+x_test <- mnist$test$x
+y_test <- mnist$test$y
+```
+
+
+The x data is a 3-d array (images,width,height) of grayscale values:
+
+```{r}
+dim(x_train)
+dim(x_test)
+```
+
+
+To prepare the data for training we convert the 3-d arrays into matrices by reshaping width and height into a single dimension (28x28 images are flattened into length 784 vectors). 
+
+```{r}
+# reshape
+dim(x_train) <- c(nrow(x_train), 784)
+dim(x_test)  <- c(nrow(x_test), 784)
+
+dim(x_train)
+dim(x_test)
+```
+
+Convert the grayscale values from integers ranging between 0 to 255 into floating point values ranging between 0 and 1:
+
+```{r}
+# rescale
+x_train <- x_train / 255
+x_test  <- x_test / 255
+```
+
+
+The y data is an integer vector with values ranging from 0 to 9. 
+
+```{r}
+dim(y_train)
+dim(y_test)
+
+head(y_train)
+summary(y_train)
+range(y_train)
+range(y_test)
+```
+
+To prepare this data for training we one-hot encode the vectors into binary class matrices using the Keras `to_categorical()` function:
+
+```{r}
+y_train <- to_categorical(y_train, 10)
+y_test  <- to_categorical(y_test, 10)
+
+names(y_train)
+range(y_train)
+```
+
+```{r}
+colnames(y_train)
+rownames(y_train)
+```
+
+## Defining the Model
+The core data structure of Keras is a model, a way to organize layers. The simplest type of model is the Sequential model, a linear stack of layers.
+
+We begin by creating a sequential model and then adding layers using the pipe (%>%) operator:
+
+```{r}
+model <- keras_model_sequential() 
+
+model %>% 
+  layer_dense(units = 256, activation = 'relu', input_shape = c(784)) %>% 
+  layer_dropout(rate = 0.4) %>% 
+  layer_dense(units = 128, activation = 'relu') %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 10, activation = 'softmax')
+```
+
+The input_shape argument to the first layer specifies the shape of the input data (a length 784 numeric vector representing a grayscale image). The final layer outputs a length 10 numeric vector (probabilities for each digit) using a `softmax` activation function.
+
+```{r}
+summary(model)
+```
+
+
+Next, compile the model with appropriate loss function, optimizer, and metrics:
+
+```{r}
+model %>% compile(
+  loss = 'categorical_crossentropy',
+  optimizer = optimizer_rmsprop(),
+  metrics = c('accuracy')
+)
+```
+
+## Training and Evaluation
+Use the fit() function to train the model for 30 epochs using batches of 128 images:
+```{r}
+history <- model %>% 
+    fit(x_train, y_train, 
+        epochs = 30, 
+        batch_size = 128, 
+        validation_split = 0.2
+)
+```
+
+The history object returned by fit() includes loss and accuracy metrics which we can plot:
+
+```{r}
+plot(history)
+```
+
+Evaluate the model’s performance on the test data:
+
+```{r}
+loss_and_metrics <- model %>% 
+    evaluate(x_test, y_test)
+```
+
+```{r}
+loss_and_metrics
+```
+
+
+Generate predictions on new data:
+
+```{r}
+classes <- model %>% 
+    predict_classes(x_test)
+```
+
+
+```{r}
+classes
+```
+
+
+Keras provides a vocabulary for building deep learning models that is simple, elegant, and intuitive. Building a question answering system, an image classification model, a neural Turing machine, or any other model is just as straightforward.
+

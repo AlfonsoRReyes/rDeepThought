@@ -1,0 +1,61 @@
+---
+title: "Boston Housing - kerasR"
+output: html_notebook
+---
+
+Source: https://cran.r-project.org/web/packages/kerasR/vignettes/introduction.html
+
+```{r}
+# Building a model in Keras starts by constructing an empty Sequential model.
+library(kerasR)
+mod <- Sequential()
+```
+
+```{r}
+# add a dense layer to our model 
+# set the number of input variables equal to 13
+mod$add(Dense(units = 50, input_shape = 13))
+```
+
+
+```{r}
+#  add an activation defined by a rectified linear unit to the model
+mod$add(Activation("relu"))
+```
+
+
+```{r}
+# add a dense layer with just a single neuron to serve as the output layer
+mod$add(Dense(units = 1))
+```
+
+
+```{r}
+#  compile it before fitting its parameters or using it for prediction
+keras_compile(mod,  loss = 'mse', optimizer = RMSprop())
+```
+
+```{r}
+boston <- load_boston_housing()
+
+#  scale the data matrices
+X_train <- scale(boston$X_train)
+Y_train <- boston$Y_train
+X_test <- scale(boston$X_test)
+Y_test <- boston$Y_test
+```
+
+```{r}
+#  fit the model from this data
+keras_fit(mod, X_train, Y_train,
+          batch_size = 32, epochs = 200,
+          verbose = 1, validation_split = 0.1)
+```
+
+
+```{r}
+# the model does not do particularly well probably due to over-fitting on such as small set.
+pred <- keras_predict(mod, normalize(X_test))
+sd(as.numeric(pred) - Y_test) / sd(Y_test)
+```
+

@@ -1,0 +1,45 @@
+---
+title: "Loading pretrained models"
+output: html_notebook
+---
+
+Source: https://cran.r-project.org/web/packages/kerasR/vignettes/introduction.html
+
+Another fantastic feature in Keras is the inclusion of several pretrained, state of the art, image processing models. We will show a small example of using InceptionV3 to classify a photo of an elephant. Specifically, let’s classify this elephant photo:
+
+```{r}
+library(kerasR)
+
+# To begin with, let us load the InceptionV3 model into R
+inception <- InceptionV3(weights='imagenet')
+```
+
+
+And then, we will use the wrapper load_img to load the elephant image into R as a python object, and then convert it into an array with img_to_array and expand_dims:
+
+```{r}
+img <- load_img("elephant.jpg", target_size = c(299, 299))
+x <- img_to_array(img)
+x <- expand_dims(x, axis = 0)
+```
+
+We specifically ask that the image be converted into a 299 by 299 image, the size of the images used to train VGG19 from imagenet. The photo must then also undergo the exact same preprocessing used on images that trained InceptionV3, which in this case just divides all the pixels by 255
+
+```{r}
+x <- x / 255
+```
+
+We can get the raw prediction categories with
+
+```{r}
+pred <- keras_predict(inception, x)
+```
+
+
+But even more directly, we can take this output and get category names:
+
+```{r}
+unlist(decode_predictions(pred, model = "InceptionV3", top = 3))
+```
+
+And we see that VGG19 correctly identifies the most likely animal in the photo as an elephant. More specifically, it spreads the probability weights over 3 specific sub-types of elephant.

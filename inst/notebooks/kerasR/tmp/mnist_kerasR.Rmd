@@ -1,0 +1,76 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+To show the power of neural networks we need a larger dataset to make use of. A popular first dataset for applying neural networks is the MNIST Handwriting dataset, consisting of small black and white scans of handwritten numeric digits (0-9). The task is to build a classifier that correctly identifies the numeric value from the scan. We may load this dataset in with the following:
+
+```{r}
+library(kerasR)
+
+mnist <- load_mnist()
+
+X_train <- mnist$X_train
+Y_train <- mnist$Y_train
+X_test <- mnist$X_test
+Y_test <- mnist$Y_test
+dim(X_train)
+```
+
+
+Notice that the training data shape is three dimensional (in the language of Keras this is a tensor). The first dimension is the specific sample number, the second is the row of the scan, and the third is the column of the scan. We will use this additional spatial information in the next section, but for now let us flatten the data so that is is just a 2D-Tensor. The values are pixel intensities between 0 and 255, so we will also normalize the values to be between 0 and 1:
+
+```{r}
+X_train <- array(X_train, dim = c(dim(X_train)[1], prod(dim(X_train)[-1]))) / 255
+X_test <- array(X_test, dim = c(dim(X_test)[1], prod(dim(X_test)[-1]))) / 255
+```
+
+
+Finally, we want to process the response vector y into a different format as well. By default it is encoded in a one-column matrix with each row giving the number represented by the hand written image. We instead would like this to be converted into a 10-column binary matrix, with exactly one 1 in each row indicating which digit is represented. This is similar to the factor contrasts matrix one would construct when using factors in a linear model. In the neural network literature it is call the one-hot representation. We construct it here via the wrapper function to_categorical. Note that we only want to convert the training data to this format; the test data should remain in its original one-column shape.
+
+```{r}
+Y_train <- to_categorical(mnist$Y_train, 10)
+```
+
+With the data in hand, we are now ready to construct a neural network. We will create three blocks of identical Dense layers, all having 512 nodes, a leaky rectified linear unit, and drop out. These will be followed on the top output layer of 10 nodes and a final softmax activation. These are fairly well-known choices for a simple dense neural network and allow us to show off many of the possibilities within the kerasR interface:
+
+```{r}
+mod <- Sequential()
+
+mod$add(Dense(units = 512, input_shape = dim(X_train)[2]))
+mod$add(LeakyReLU())
+mod$add(Dropout(0.25))
+
+mod$add(Dense(units = 512))
+mod$add(LeakyReLU())
+mod$add(Dropout(0.25))
+
+mod$add(Dense(units = 512))
+mod$add(LeakyReLU())
+mod$add(Dropout(0.25))
+
+mod$add(Dense(10))
+mod$add(Activation("softmax"))
+```
+
+
+We then compile the model with the “categorical_crossentropy” loss and fit it on the training data:
+
+```{r}
+keras_compile(mod,  loss = 'categorical_crossentropy', optimizer = RMSprop())
+keras_fit(mod, X_train, Y_train, batch_size = 32, epochs = 5, verbose = 1,
+          validation_split = 0.1)
+```
+
+Now that the model is trained, we could use the function `keras_predict` once again, however this would give us an output matrix with 10 columns. It is not too much work to turn this into predicted classes, but kerasR provides `keras_predict_classes` that extracts the predicted classes directly. Using this we are able to evaluate the data on the test set.
+
+
+```{r}
+Y_test_hat <- keras_predict_classes(mod, X_test)
+table(Y_test, Y_test_hat)
+mean(Y_test == Y_test_hat)
+```
+
+Looking at the mis-classification rate and the confusion matrix, we see that the neural network performs very well (with a classification rate around 95%). It’s possible to get slightly higher with strictly dense layers by employing additional tricks and using larger models with more regularization. To increase the model drastically requires the use of convolutional neural networks (CNN), which we will look at in the next section.
+
+

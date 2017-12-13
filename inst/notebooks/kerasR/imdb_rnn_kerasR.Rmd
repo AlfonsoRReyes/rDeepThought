@@ -1,0 +1,98 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(kerasR)
+
+imdb <- load_imdb(num_words = 500, maxlen = 100)
+
+X_train <- pad_sequences(imdb$X_train[1:4000], maxlen = 100)
+Y_train <- imdb$Y_train[1:4000]
+X_test <- pad_sequences(imdb$X_train[4001:5736], maxlen = 100)
+Y_test <- imdb$Y_train[4001:5736]
+```
+
+
+
+```{r}
+mod <- Sequential()
+
+mod$add(Embedding(500, 32, input_length = 100, input_shape = c(100)))
+mod$add(Dropout(0.25))
+
+mod$add(Flatten())
+
+mod$add(Dense(256))
+mod$add(Dropout(0.25))
+mod$add(Activation('relu'))
+
+mod$add(Dense(1))
+mod$add(Activation('sigmoid'))
+```
+
+
+
+```{r}
+keras_compile(mod,  loss = 'binary_crossentropy', optimizer = RMSprop(lr = 0.00025))
+keras_fit(mod, X_train, Y_train, batch_size = 32, epochs = 10, verbose = 1,
+          validation_split = 0.1)
+```
+
+
+```{r}
+Y_test_hat <- keras_predict(mod, X_test)
+table(Y_test, round(Y_test_hat))
+mean(Y_test == as.numeric(round(Y_test_hat)))
+```
+
+
+```{r}
+mod <- Sequential()
+
+mod$add(Embedding(500, 32, input_length = 100, input_shape = c(100)))
+mod$add(Dropout(0.25))
+
+mod$add(LSTM(32))
+
+mod$add(Dense(256))
+mod$add(Dropout(0.25))
+mod$add(Activation('relu'))
+
+mod$add(Dense(1))
+mod$add(Activation('sigmoid'))
+```
+
+
+
+```{r}
+keras_compile(mod,  loss = 'binary_crossentropy', optimizer = RMSprop(lr = 0.00025))
+keras_fit(mod, X_train, Y_train, batch_size = 32, epochs = 10, verbose = 1,
+          validation_split = 0.1)
+```
+
+
+```{r}
+Y_test_hat <- keras_predict(mod, X_test)
+mean(Y_test == as.numeric(round(Y_test_hat)))
+```
+
+
+## Saving the model
+The first saves the entire model, which is more than likely what most users would want, as a binary file. The second saves only the weights as a binary file; the actual model architecture would have to be created again in R. Finally, the last saves just a json description of the model. This is probably most helpful because it gives a human-readable description of your model architecture.
+
+```{r}
+keras_save(mod, "full_model.h5")
+keras_save_weights(mod, "weights_model.h5")
+keras_model_to_json(mod, "model_architecture.json")
+```
+
+
+## Read back the model
+```{r}
+mod <- keras_load("full_model.h5")
+keras_load_weights(mod, tf)
+mod <- keras_model_to_json("model_architecture.json")
+```
+

@@ -1,0 +1,59 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Source: https://cran.r-project.org/web/packages/kerasR/vignettes/introduction.html
+
+```{r}
+# images are black and white
+library(kerasR)
+
+mnist <- load_mnist()
+#  increase the number of dimension in the X_train tensor by one
+# additional dimension could represent a “gray” channel.
+X_train <- array(mnist$X_train, dim = c(dim(mnist$X_train), 1)) / 255
+Y_train <- to_categorical(mnist$Y_train, 10)
+X_test <- array(mnist$X_test, dim = c(dim(mnist$X_test), 1)) / 255
+Y_test <- mnist$Y_test
+```
+
+
+
+```{r}
+#  build a CNN model by using the convolution specific Conv2D and MaxPooling layers
+# deep convolution layers followed by Dense layers at the top of the network
+mod <- Sequential()
+
+mod$add(Conv2D(filters = 32, kernel_size = c(3, 3),
+               input_shape = c(28, 28, 1)))
+mod$add(Activation("relu"))
+mod$add(Conv2D(filters = 32, kernel_size = c(3, 3),
+               input_shape = c(28, 28, 1)))
+mod$add(Activation("relu"))
+mod$add(MaxPooling2D(pool_size=c(2, 2)))
+mod$add(Dropout(0.25))
+
+# The flatten layer converts its inputs into a 2-dimensional tensor 
+mod$add(Flatten())
+mod$add(Dense(128))
+mod$add(Activation("relu"))
+mod$add(Dropout(0.25))
+mod$add(Dense(10))
+mod$add(Activation("softmax"))
+```
+
+```{r}
+# compile it and fit it to the data
+keras_compile(mod,  loss = 'categorical_crossentropy', optimizer = RMSprop())
+keras_fit(mod, X_train, Y_train, batch_size = 32, epochs = 5, verbose = 1,
+          validation_split = 0.1)
+```
+
+
+```{r}
+Y_test_hat <- keras_predict_classes(mod, X_test)
+table(Y_test, Y_test_hat)
+mean(Y_test == Y_test_hat)
+```
+
