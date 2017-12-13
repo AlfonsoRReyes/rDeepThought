@@ -1,0 +1,57 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(deepnet)
+
+Var1 <- c(rnorm(50, 1, 0.5), rnorm(50, -0.6, 0.2))
+Var2 <- c(rnorm(50, -0.8, 0.2), rnorm(50, 2, 1))
+x <- matrix(c(Var1, Var2), nrow = 100, ncol = 2)
+y <- c(rep(1, 50), rep(0, 50))
+nn <- nn.train(x, y, hidden = c(5))
+## predict by nn
+test_Var1 <- c(rnorm(50, 1, 0.5), rnorm(50, -0.6, 0.2))
+test_Var2 <- c(rnorm(50, -0.8, 0.2), rnorm(50, 2, 1))
+test_x <- matrix(c(test_Var1, test_Var2), nrow = 100, ncol = 2)
+yy <- nn.predict(nn, test_x)
+
+```
+
+
+https://stackoverflow.com/questions/38500473/how-to-use-deepnet-for-classification-in-r
+
+https://stackoverflow.com/a/38501656/5270873
+
+```{r}
+library(deepnet)
+Var1 <- c(rnorm(50, 1, 0.5), rnorm(50, -0.6, 0.2))
+Var2 <- c(rnorm(50, -0.8, 0.2), rnorm(50, 2, 1))
+x <- matrix(c(Var1, Var2), nrow = 100, ncol = 2)
+y <- c(rep(1, 50), rep(0, 50))
+nn <- dbn.dnn.train(x, y, hidden = c(5))
+```
+
+
+```{r}
+Var1 <- c(rnorm(50, 1, 0.5), rnorm(50, -0.6, 0.2))
+Var2 <- c(rnorm(50, -0.8, 0.2), rnorm(50, 2, 1))
+x <- matrix(c(Var1, Var2), nrow = 100, ncol = 2)
+y <- c(rep(1, 50), rep(0, 50))
+```
+
+```{r}
+dnn <- dbn.dnn.train(x, y, hidden = c(5, 5))
+```
+
+```{r}
+test_Var1 <- c(rnorm(50, 1, 0.5), rnorm(50, -0.6, 0.2))
+test_Var2 <- c(rnorm(50, -0.8, 0.2), rnorm(50, 2, 1))
+test_x <- matrix(c(test_Var1, test_Var2), nrow = 100, ncol = 2)
+nn.test(dnn, test_x, y)
+
+#[1] 0.25
+```
+
