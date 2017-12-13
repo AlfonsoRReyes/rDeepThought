@@ -1,0 +1,18 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Set `bench.save` to `FALSE` to prevent creating a folder with output data.
+
+```{r}
+library(darch)
+
+data(iris)
+modelList <- darchBench(Species ~ ., iris, c(0, 50, 0), 
+                        preProc.params = list(method = c("center", "scale")), 
+                        darch.unitFunction = c("sigmoidUnit", "softmaxUnit"), 
+                        darch.numEpochs = 30, bench.times = 10, bench.save = F)
+
+```
+

@@ -1,0 +1,13 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(darch)
+
+data(iris)
+model <- darch(Species ~ ., iris, darch.fineTuneFunction = "backpropagation")
+```
+
