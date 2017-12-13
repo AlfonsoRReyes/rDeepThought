@@ -1,0 +1,116 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Source: http://past.rinfinance.com/agenda/2016/talk/QiangKou.pdf
+Data: https://www.kaggle.com/c/digit-recognizer/data
+
+
+```{r}
+extdata <- system.file("extdata", package = "rDeepThought")
+```
+
+
+```{r}
+library(mxnet)
+
+extdata <- system.file("extdata", package = "rDeepThought")
+train <- read.csv(paste(extdata, "train_digits.csv", sep = "/"), header=TRUE)
+test  <- read.csv(paste(extdata, "test_digits.csv", sep = "/"), header=TRUE)
+
+train <- data.matrix(train)
+test <- data.matrix(test)
+train.x <- train[,-1]
+train.y <- train[,1]
+train.x <- t(train.x/255)
+test <- t(test/255)
+```
+
+```{r}
+data <- mx.symbol.Variable("data")
+fc1 <- mx.symbol.FullyConnected(data, name="fc1", num_hidden=128)
+act1 <- mx.symbol.Activation(fc1, name="relu1", act_type="relu")
+fc2 <- mx.symbol.FullyConnected(act1, name="fc2", num_hidden=64)
+act2 <- mx.symbol.Activation(fc2, name="relu2", act_type="relu")
+fc3 <- mx.symbol.FullyConnected(act2, name="fc3", num_hidden=10)
+softmax <- mx.symbol.SoftmaxOutput(fc3, name="sm")
+```
+
+
+```{r}
+graph.viz(softmax$as.json())
+```
+
+## Train the model
+
+```{r}
+# originally was: ctx=mx.gpu()
+mx.set.seed(0)
+model <- mx.model.FeedForward.create(softmax, X=train.x, 
+                                     y=train.y, ctx=mx.cpu(), num.round=10, 
+                                     array.batch.size=100, 
+                                     learning.rate=0.07, momentum=0.9, 
+                                     eval.metric=mx.metric.accuracy, 
+                                     initializer=mx.init.uniform(0.07), 
+                                     batch.end.callback = mx.callback.log.train.metric(100))
+```
+
+
+```{r}
+# input
+data <- mx.symbol.Variable('data')
+
+# first conv
+conv1 <- mx.symbol.Convolution(data=data, kernel=c(5,5), num_filter=20)
+tanh1 <- mx.symbol.Activation(data=conv1, act_type="tanh")
+pool1 <- mx.symbol.Pooling(data=tanh1, pool_type="max", kernel=c(2,2), stride=c(2,2))
+
+# second conv
+conv2 <- mx.symbol.Convolution(data=pool1, kernel=c(5,5), num_filter=50)
+tanh2 <- mx.symbol.Activation(data=conv2, act_type="tanh")
+pool2 <- mx.symbol.Pooling(data=tanh2, pool_type="max", kernel=c(2,2), stride=c(2,2))
+
+# first fullc
+flatten <- mx.symbol.Flatten(data=pool2)
+fc1 <- mx.symbol.FullyConnected(data=flatten, num_hidden=500)
+tanh3 <- mx.symbol.Activation(data=fc1, act_type="tanh")
+
+# second fullc
+fc2 <- mx.symbol.FullyConnected(data=tanh3, num_hidden=10)
+# loss
+lenet <- mx.symbol.SoftmaxOutput(data=fc2)
+
+```
+
+
+```{r}
+# lstm cell symbol
+lstm <- function(num.hidden, indata, prev.state, param, seqidx, 
+                 layeridx, dropout=0) {
+if (dropout > 0)
+indata <- mx.symbol.Dropout(data=indata, p=dropout)
+i2h <- mx.symbol.FullyConnected(data=indata,
+weight=param$i2h.weight,
+bias=param$i2h.bias,
+num.hidden=num.hidden * 4,
+name=paste0("t", seqidx, ".l", layeridx, ".i2h"))
+h2h <- mx.symbol.FullyConnected(data=prev.state$h,
+weight=param$h2h.weight,
+bias=param$h2h.bias,
+num.hidden=num.hidden * 4,
+name=paste0("t", seqidx, ".l", layeridx, ".h2h"))
+gates <- i2h + h2h
+slice.gates <- mx.symbol.SliceChannel(gates, num.outputs=4,
+name=paste0("t", seqidx, ".l", layeridx, ".slice"))
+in.gate <- mx.symbol.Activation(slice.gates[[1]], act.type="sigmoid")
+in.transform <- mx.symbol.Activation(slice.gates[[2]], act.type="tanh")
+forget.gate <- mx.symbol.Activation(slice.gates[[3]], act.type="sigmoid")
+out.gate <- mx.symbol.Activation(slice.gates[[4]], act.type="sigmoid")
+next.c <- (forget.gate * prev.state$c) + (in.gate * in.transform)
+next.h <- out.gate * mx.symbol.Activation(next.c, act.type="tanh")
+return (list(c=next.c, h=next.h))
+}
+
+```
+
