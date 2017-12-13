@@ -3,7 +3,10 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+Source: https://github.com/rstudio/tensorflow/blob/master/inst/examples/mnist/mnist_softmax.R
+
 ```{r}
+# mnist_softmax.R
 library(tensorflow)
 
 # Create the model
