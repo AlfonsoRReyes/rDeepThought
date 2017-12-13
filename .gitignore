@@ -6,3 +6,5 @@
 inst/notebooks/mxnet/image_classification/dog\.rds
 
 inst/notebooks/mxnet/image_classification/cat\.rds
+
+*.html
