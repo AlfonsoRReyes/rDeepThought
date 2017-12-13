@@ -1,0 +1,136 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## The sigmoid function
+
+```{r}
+basic_sigmoid <- function(x) {
+    s <- 1 / (1 + exp (-x))
+    return(s)
+}
+
+```
+
+
+```{r}
+basic_sigmoid(3)
+# 9525741
+```
+
+## Vector operations
+
+```{r}
+x <- array(c(1, 2, 3))
+print(x + 3)
+```
+
+
+## Sigmoid on a vector
+
+```{r}
+sigmoid <- function(x) {
+    s <- 1 / ( 1 + exp(-x))
+    return(s)
+}
+```
+
+
+```{r}
+x <- array(c(1, 2, 3))
+sigmoid(x)
+```
+
+
+## Sigmoid gradient
+
+```{r}
+sigmoid_derivative <- function(x) {
+    # Compute the gradient (also called the slope or derivative) of the sigmoid 
+    # function with respect to its input x.
+    # You can store the output of the sigmoid function into variables and then 
+    # use it to calculate the gradient.
+    
+    # Arguments:
+    # x -- A scalar or numpy array
+     
+    # Return:
+    # ds -- Your computed gradient.
+    
+    s <- 1 / ( 1 + exp(-x))
+    ds <- s * (1 - s)
+    return(ds)
+}
+
+```
+
+
+```{r}
+x <- array(c(1, 2, 3))
+sigmoid_derivative(x)
+# 0.19661193 0.10499359 0.04517666
+```
+
+
+## Reshaping arrays
+, in computer science, an image is represented by a 3D array of shape (length,height,depth=3). However, when you read an image as the input of an algorithm you convert it to a vector of shape (length∗height∗3,1). In other words, you "unroll", or reshape, the 3D array into a 1D vector.
+
+
+> Implement image2vector() that takes an input of shape (length, height, 3) and returns a vector of shape (length*height*3, 1). For example, if you would like to reshape an array v of shape (a, b, c) into a vector of shape (a*b,c) you would do:
+
+```{r}
+image2vector <- function(image){
+    # Argument:
+    # image -- a numpy array of shape (length, height, depth)
+    # 
+    # Returns:
+    # v -- a vector of shape (length*height*depth, 1)
+    
+    v = array(image, dim = c(dim(image)[1] * dim(image)[2] * dim(image)[3], 1))
+}    
+```
+
+
+```{r}
+
+image =  array(cbind(
+    rbind(c( 0.67826139,  0.29380381),
+        c( 0.90714982,  0.52835647),
+        c( 0.4215251 ,  0.45017551)),
+
+       rbind(c( 0.92814219,  0.96677647),
+        c( 0.85304703,  0.52351845),
+        c( 0.19981397,  0.27417313)),
+
+       rbind(c( 0.60659855,  0.00533165),
+        c( 0.10820313,  0.49978937),
+        c( 0.34144279,  0.94630077))),
+    dim = c(3,3,2)
+)
+
+image
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+# take row 1 only
+image[1,,]
+```
+
+```{r}
+# take column 2
+image[,2,]
+```
+
+
+```{r}
+# take slice 2
+image[,,2]
+```
+
