@@ -1,0 +1,123 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Reading the Data 
+
+```{r}
+# Read in `iris` data
+white <- read.csv(url("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"), sep = ";") 
+
+# Return the first part of `iris`
+head(white)
+
+# Inspect the structure
+str(white)
+
+# Obtain the dimensions
+dim(white)
+```
+
+
+```{r}
+# Read in `iris` data
+red <- read.csv(url("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"), sep = ";") 
+
+# Return the first part of `iris`
+head(red)
+
+# Inspect the structure
+str(red)
+
+# Obtain the dimensions
+dim(red)
+```
+
+
+
+
+
+
+
+
+## Data Exploration
+With the data at hand, it’s easy for you to learn more about these wines! One of the first things that you’ll probably want to do is to start off with getting a quick view on both of your DataFrames:
+
+
+```{r}
+head(white)
+head(red)
+```
+
+```{r}
+summary(red)
+summary(white)
+```
+
+```{r}
+any(is.na(red))
+any(is.na(white))
+```
+
+
+## Visualizing The Data
+One way to do this is by looking at the distribution of some of the dataset’s variables and make scatter plots to see possible correlations. Of course, you can take this all to a much higher level if you would use this data for your own project.
+
+### Alcohol
+One variable that you could find interesting at first sight is alcohol. It’s probably one of the first things that catches your attention when you’re inspecting a wine data set. You can visualize the distributions with any data visualization library, but in this case, the tutorial makes use of matplotlib to quickly plot the distributions:
+
+```{r}
+hist(red$alcohol)
+```
+
+```{r}
+print(hist(red$alcohol))
+```
+
+### Sulphates
+Next, one thing that interests me is the relation between the sulphates and the quality of the wine. As you have read above, sulphates can cause people to have headaches and I’m wondering if this infuences the quality of the wine. What’s more, I often hear that women especially don’t want to drink wine exactly because it causes headaches. Maybe this affects the ratings for the red wine?
+
+Let’s take a look.
+
+```{r}
+par(mfrow = c(1, 2))
+plot(red$quality, red$sulphates, col = "red", ylim = c(0, 2.5))
+plot(white$quality, white$sulphates, col = "black", ylim = c(0, 2.5))
+
+```
+
+As you can see in the image below, the red wine seems to contain more sulphates than the white wine, which has less sulphates above 1 $g/dm^3$. For the white wine, there only seem to be a couple of exceptions that fall just above 1 g/dm3dm3, while this is definitely more for the red wines. This could maybe explain the general saying that red wine causes headaches, but what about the quality?
+
+You can clearly see that there is white wine with a relatively low amount of sulphates that gets a score of 9, but for the rest it’s difficult to interpret the data correctly at this point.
+
+Of course, you need to take into account that the difference in observations could also affect the graphs and how you might interpret them.
+
+### Acidity
+Apart from the sulphates, the acidity is one of the major and important wine characteristics that is necessary to achieve quality wines. Great wines often balance out acidity, tannin, alcohol and sweetness. Some more research taught me that in quantities of 0.2 to 0.4 g/L, volatile acidity doesn’t affect a wine’s quality. At higher levels, however, volatile acidity can give wine a sharp, vinegary tactile sensation. Extreme volatile acidity signifies a seriously flawed wine.
+
+Let’s put the data to the test and make a scatter plot that plots the alcohol versus the volatile acidity. The data points should be colored according to their rating or quality label:
+
+```{r}
+red$cols = as.numeric(as.factor(red$quality))
+legend.cols = as.numeric(as.factor(levels(red$quality)))
+
+par(mfrow = c(1, 2))
+plot(red$volatile.acidity, red$alcohol, xlim = c(0, 1.7), 
+     ylim=c(5, 15.5), 
+     col = red$quality)
+
+plot(white$volatile.acidity, white$alcohol, xlim = c(0, 1.7), 
+     ylim=c(5, 15.5), 
+     col = red$quality)
+
+```
+
+
+```{r}
+v1$cols = as.numeric(as.factor(v1$group))
+legend.cols = as.numeric(as.factor(levels(v1$group)))
+plot(v1$x , v1$y, pch=16, col=v1$cols)
+legend("topright", legend=levels(group), pch=16, col=legend.cols)
+```
+
