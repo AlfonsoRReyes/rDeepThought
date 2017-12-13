@@ -1,0 +1,89 @@
+---
+title: "Basic Operations"
+output: html_notebook
+---
+
+https://github.com/aymericdamien/TensorFlow-Examples/blob/master/notebooks/1_Introduction/basic_operations.ipynb
+
+```{r}
+library(tensorflow)
+```
+
+
+```{r}
+# Basic constant operations
+# The value returned by the constructor represents the output
+a <- tf$constant(2)
+b <- tf$constant(3)
+# sess$run(hello)
+```
+
+
+```{r}
+sess = tf$Session()
+
+print(sess$run(a))
+print(sess$run(b))
+```
+
+```{r}
+# Basic Operations with variable as graph input
+# The value returned by the constructor represents the output
+# of the Variable op. (define as input when running session)
+# tf Graph input
+a = tf$placeholder(tf$int16)
+b = tf$placeholder(tf$int16)
+```
+
+
+```{r}
+
+# Define some operations
+add = tf$add(a, b)
+mul = tf$multiply(a, b)
+```
+
+
+```{r}
+sess$run(add, feed_dict = dict(a=2, b=4))
+```
+
+```{r}
+sess$run(mul, feed_dict = dict(a = 2, b = 3))
+```
+
+
+```{r}
+# ----------------
+# More in details:
+# Matrix Multiplication from TensorFlow official tutorial
+
+# Create a Constant op that produces a 1x2 matrix.  The op is
+# added as a node to the default graph.
+#
+# The value returned by the constructor represents the output
+# of the Constant op.
+matrix1 = tf$constant(matrix(c(3,3), 1, 2))
+matrix1
+```
+
+```{r}
+# Create another Constant that produces a 2x1 matrix.
+matrix2 = tf$constant(matrix(c(2,2), 2, 1))
+matrix2
+```
+
+```{r}
+# Create a Matmul op that takes 'matrix1' and 'matrix2' as inputs.
+# The returned value, 'product', represents the result of the matrix
+# multiplication.
+product = tf$matmul(matrix1, matrix2)
+product
+```
+
+```{r}
+sess = tf$Session()
+result <- sess$run(product)
+print(result)
+```
+

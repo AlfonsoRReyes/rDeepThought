@@ -1,0 +1,63 @@
+---
+title: "Reading Data"
+output: html_notebook
+---
+
+## Built-in Datasets
+If you have some previous experience with the Keras package in Python, you probably will have already accessed the Keras built-in datasets with functions such as `mnist.load_data()`, `cifar10.load_data()`, or `imdb.load_data()`.
+
+Here are some examples where you load in the MNIST, CIFAR10 and IMDB data with the keras package:
+
+```{r}
+library(keras)
+
+# Read in MNIST data
+# mnist <- dataset_mnist()
+
+# Read in CIFAR10 data
+cifar10 <- dataset_cifar10()
+
+# Read in IMDB data
+imdb <- dataset_imdb()
+```
+
+Note that all functions to load in built-in data sets with keras follow the same pattern; For MNIST data, you’ll use the dataset_mnist() function to load in your data.
+
+
+
+## Dummy Data
+Alternatively, you can also quickly make some dummy data to get started. You can easily use the matrix() function to accomplish this:
+
+```{r}
+# Make your dummy data
+data <- matrix(rexp(1000*784), nrow = 1000, ncol = 784)
+
+# Make dummy target values for your dummy data
+labels <- matrix(round(runif(1000*10, min = 0, max = 9)), nrow = 1000, ncol = 10)
+```
+
+
+## Reading Data From Files
+Besides the built-in datasets, you can also load in data from files. For this tutorial, you’ll focus on loading in data from CSV files, but if you want to know more about importing files in R, consider DataCamp’s R Data Import Tutorial.
+
+Let’s use the read.csv() function from the read.table package to load in a data set from the UCI Machine Learning Repository:
+
+
+```{r}
+# Read in `iris` data
+iris <- read.csv(url("http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"), header = FALSE) 
+
+# Return the first part of `iris`
+head(iris)
+
+# Inspect the structure
+str(iris)
+
+# Obtain the dimensions
+dim(iris)
+```
+
+
+It’s always a good idea to check out whether your data import was successful. You usually use functions such as head(), str() and dim() like in the DataCamp Light chunk above to quickly do this.
+
+The results of these three functions do not immediately point out anything out of the ordinary; By looking at the output of the str() function, you see that the strings of the Species column are read in as factors. This is no problem, but it’s definitely good to know for the next steps, where you’re going to explore and preprocess the data.
