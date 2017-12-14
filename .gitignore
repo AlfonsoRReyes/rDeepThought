@@ -12,3 +12,5 @@ inst/notebooks/mxnet/image_classification/cat\.rds
 MNIST-data/
 
 inst/notebooks/mxnet/tmp/submission\.csv
+# include html files under ./docs folder
+!docs/*.html
