@@ -1,17 +1,32 @@
 # Log for Deep Learning
 
-## template for application
+
+## <u>MNIST For ML Beginners</u>
+![](img\6b5ee949d2d0e95246179c8e3faf6bec.png)
+
 ### Goal, objective
-* What we are trying to achieve
+* train a model to look at images and predict what digits they are.
+
 ### Uniqueness of the application
+* Very well explained process.
+* Explains Softmax graphically from diagram to vector
+* It is based on a R script (`mnist_softmax.R`)
 ### Dataset
+* MNIST
 ### Toolbox
+* package `Tensorflow`
+
 ### Location
+* `R:\github-alfonso\rDeepThought\inst\notebooks\tensorflow`
+![](img\fa72ae4acf0ded477c55846617c0daa9.png)
+
 ### References
 
 ----
-## Image classification of cats and dogs
-This application is very interesting because we work directly with the images and not the arrays and is commonly done. The images are in `jpg` format.
+## <u>Image classification of cats and dogs</u>
+This application is very interesting because we work directly with the images and not the arrays and is commonly done. The images are in `jpg` format. There 12499 cat images.
+![12499 cat images](img\5007e6a479a4533d60391d26b6c391f8.png)
+
 
 ### Dataset
 * This example
@@ -24,6 +39,15 @@ Local: `R:\github-alfonso\rDeepThought\inst\notebooks\mxnet\image_classification
 
 Remote:
 
+
+## template for application
+### Goal, objective
+* What we are trying to achieve
+### Uniqueness of the application
+### Dataset
+### Toolbox
+### Location
+### References
 
 
 
