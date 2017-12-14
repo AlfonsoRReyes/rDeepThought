@@ -1,13 +1,15 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # MNIST For ML Beginners
 
 ## The MNIST Data
 
-The MNIST data is hosted on Yann LeCun’s website. If you are copying and pasting in the code from this tutorial, start here with these three lines of code which will download and read in the data automatically:
+The MNIST data is hosted on [Yann LeCun’s website][]. If you are copying and pasting in the code from this tutorial, start here with these three lines of code which will download and read in the data automatically:
 
 ```{r}
 library(tensorflow)
@@ -15,9 +17,9 @@ datasets <- tf$contrib$learn$datasets
 mnist <- datasets$mnist$read_data_sets("MNIST-data", one_hot = TRUE)
 ```
 
-The MNIST data is split into three parts: 55,000 data points of training data (mnist$train), 10,000 points of test data (mnist$test), and 5,000 points of validation data (mnist$validation). This split is very important: It’s essential in machine learning that we have separate data which we don’t learn from so that we can make sure that what we’ve learned actually generalizes!
+The MNIST data is split into three parts: 55,000 data points of training data (`mnist$train`), 10,000 points of test data (`mnist$test`), and 5,000 points of validation data (`mnist$validation`). This split is very important: It’s essential in machine learning that we have separate data which we don’t learn from so that we can make sure that what we’ve learned actually generalizes!
 
-As mentioned earlier, every MNIST data point has two parts: an image of a handwritten digit and a corresponding label. We’ll call the images “x” and the labels “y”. Both the training set and test set contain images and their corresponding labels; for example the training images are mnist$train$images and the training labels are mnist$train$labels.
+As mentioned earlier, every MNIST data point has two parts: an image of a handwritten digit and a corresponding label. We’ll call the images “x” and the labels “y”. Both the training set and test set contain images and their corresponding labels; for example the training images are `mnist$train$images` and the training labels are `mnist$train$labels`.
 
 Each image is 28 pixels by 28 pixels. We can interpret this as a big array of numbers:
 
@@ -25,12 +27,15 @@ Each image is 28 pixels by 28 pixels. We can interpret this as a big array of nu
 knitr::include_graphics("./img/MNIST-Matrix.png")
 ```
 
+> **My notes**: it is a matrix or 2D array of 28x28.
 
 We can flatten this array into a vector of 28x28 = 784 numbers. It doesn’t matter how we flatten the array, as long as we’re consistent between images. From this perspective, the MNIST images are just a bunch of points in a 784-dimensional vector space, with a very rich structure (warning: computationally intensive visualizations).
 
+> My Notes: when it is flatenned, the 2D matrix turns into a row-vector of 784.
+
 Flattening the data throws away information about the 2D structure of the image. Isn’t that bad? Well, the best computer vision methods do exploit this structure, and we will in later tutorials. But the simple method we will be using here, a softmax regression (defined below), won’t.
 
-The result is that mnist$train$images is a tensor (an n-dimensional array) with shape (55000L, 784L). The first dimension is an index into the list of images and the second dimension is the index for each pixel in each image. Each entry in the tensor is a pixel intensity between 0 and 1, for a particular pixel in a particular image.
+The result is that `mnist$train$images` is a tensor (an n-dimensional array) with shape (55000L, 784L). The first dimension is an index into the list of images and the second dimension is the index for each pixel in each image. Each entry in the tensor is a pixel intensity between 0 and 1, for a particular pixel in a particular image.
 
 ```{r, out.width = "400px", echo=F}
 knitr::include_graphics("./img/mnist-train-xs.png")
@@ -38,14 +43,17 @@ knitr::include_graphics("./img/mnist-train-xs.png")
 
 Each image in MNIST has a corresponding label, a number between 0 and 9 representing the digit drawn in the image.
 
-For the purposes of this tutorial, we’re going to want our labels as “one-hot vectors”. A one-hot vector is a vector which is 0 in most dimensions, and 1 in a single dimension. In this case, the n nth digit will be represented as a vector which is 1 in the nnth dimension. For example, 3 would be [0,0,0,1,0,0,0,0,0,0]
-[0,0,0,1,0,0,0,0,0,0]. Consequently, mnist$train$labels is a (55000L, 10L) array of floats.
+For the purposes of this tutorial, we’re going to want our labels as “one-hot vectors”. A one-hot vector is a vector which is 0 in most dimensions, and 1 in a single dimension. In this case, the $n$th digit will be represented as a vector which is 1 in the $n$th dimension. For example, 3 would be 
+$[0,0,0,1,0,0,0,0,0,0]$. Consequently, `mnist$train$labels` is a (55000L, 10L) array of floats.
+
+> **My notes**: what this means is, if we have ten classes, in our example, digits from 0 to 9, then we need ten dimensions to allocate the `one-hot` vector.
 
 ```{r, out.width = "400px", echo=F}
 knitr::include_graphics("./img/mnist-train-ys.png")
 ```
 
 We’re now ready to actually make our model!
+
 
 ## Softmax Regressions
 
@@ -75,11 +83,11 @@ $$\text{evidence}_i = \sum_j W_{i,~ j} x_j + b_i$$
 
 
 
-But it’s often more helpful to think of softmax the first way: exponentiating its inputs and then normalizing them. The exponentiation means that one more unit of evidence increases the weight given to any hypothesis multiplicatively. And conversely, having one less unit of evidence means that a hypothesis gets a fraction of its earlier weight. No hypothesis ever has zero or negative weight. Softmax then normalizes these weights, so that they add up to one, forming a valid probability distribution. (To get more intuition about the softmax function, check out the section on it in Michael Nielsen’s book, complete with an interactive visualization.)
+But it’s often more helpful to think of softmax the first way: exponentiating its inputs and then normalizing them. The exponentiation means that one more unit of evidence increases the weight given to any hypothesis multiplicatively. And conversely, having one less unit of evidence means that a hypothesis gets a fraction of its earlier weight. No hypothesis ever has zero or negative weight. Softmax then normalizes these weights, so that they add up to one, forming a valid probability distribution. (To get more intuition about the [softmax][] function, check out the section on it in Michael Nielsen’s book, complete with an interactive visualization.)
 
 You can picture our softmax regression as looking something like the following, although with a lot more $x$s. For each output, we compute a weighted sum of the $x$s, add a bias, and then apply softmax.
 
-```{r, out.width = "400px", echo=F}
+```{r, out.width = "400px", echo=F, fig.cap="diagram"}
 knitr::include_graphics("./img/softmax-regression-scalargraph.png")
 ```
 
@@ -116,7 +124,7 @@ x <- tf$placeholder(tf$float32, shape(NULL, 784L))
 ```
 
 
-x isn’t a specific value. It’s a placeholder, a value that we’ll input when we ask TensorFlow to run a computation. We want to be able to input any number of MNIST images, each flattened into a 784-dimensional vector. We represent this as a 2-D tensor of floating-point numbers, with shape (NULL, 784L). (Here NULL means that a dimension can be of any length.)
+x isn’t a specific value. It’s a `placeholder`, a value that we’ll input when we ask TensorFlow to run a computation. We want to be able to input any number of MNIST images, each flattened into a 784-dimensional vector. We represent this as a 2-D tensor of floating-point numbers, with shape (NULL, 784L). (Here NULL means that a dimension can be of any length.)
 
 We also need the weights and biases for our model. We could imagine treating these like additional inputs, but TensorFlow has an even better way to handle it: Variable. A Variable is a modifiable tensor that lives in TensorFlow’s graph of interacting operations. It can be used and even modified by the computation. For machine learning applications, one generally has the model parameters be Variables.
 
@@ -137,7 +145,7 @@ y <- tf$nn$softmax(tf$matmul(x, W) + b)
 ```
 
 
-First, we multiply x by W with the expression `tf$matmul(x, W)`. This is flipped from when we multiplied them in our equation, where we had $W_x$, as a small trick to deal with x being a 2D tensor with multiple inputs. We then add b, and finally apply tf$nn$softmax.
+First, we multiply $x$ by $W$ with the expression `tf$matmul(x, W)`. This is flipped from when we multiplied them in our equation, where we had $W_x$, as a small trick to deal with x being a 2D tensor with multiple inputs. We then add $b$, and finally apply `tf$nn$softmax`.
 
 That’s it. It only took us one line to define our model, after a couple short lines of setup. That isn’t because TensorFlow is designed to make a softmax regression particularly easy: it’s just a very flexible way to describe many kinds of numerical computations, from machine learning models to physics simulations. And once defined, our model can be run on different devices: your computer’s CPU, GPUs, and even phones!
 
@@ -164,7 +172,7 @@ cross_entropy <- tf$reduce_mean(-tf$reduce_sum(y_ * tf$log(y), reduction_indices
 
 ```
 
-First, tf$log computes the logarithm of each element of y. Next, we multiply each element of y_ with the corresponding element of tf$log(y). Then tf$reduce_sum adds the elements in the second dimension of y, due to the reduction_indices=1L parameter. Finally, tf$reduce_mean computes the mean over all the examples in the batch.
+First, `tf$log` computes the logarithm of each element of y. Next, we multiply each element of y_ with the corresponding element of `tf$log(y)`. Then `tf$reduce_sum` adds the elements in the second dimension of y, due to the reduction_indices=1L parameter. Finally, tf$reduce_mean computes the mean over all the examples in the batch.
 
 > Note that tensor indices (like the one used for reduction_indices) are 0-based within the TensorFlow API (rather than 1-based as is typical with R vectors).
 
@@ -204,6 +212,8 @@ for (i in 1:1000) {
 }
 ```
 
+> My note: `dict` is a function in TensorFlow.
+
 Each step of the loop, we get a “batch” of **one hundred random data points** from our training set. We run train_step feeding in the batches data to replace the placeholders.
 
 Using small batches of random data is called [stochastic training][] – in this case, [stochastic gradient descent][]. Ideally, we’d like to use all our data for every step of training because that would give us a better sense of what we should be doing, but that’s expensive. So, instead, we use a different subset every time. Doing this is cheap and has much of the same benefit.
@@ -212,16 +222,15 @@ Using small batches of random data is called [stochastic training][] – in this
 
 How well does our model do?
 
-Well, first let’s figure out where we predicted the correct label. tf$argmax is an extremely useful function which gives you the index of the highest entry in a tensor along some axis. For example, tf$argmax(y, 1L) is the label our model thinks is most likely for each input, while tf$argmax(y_, 1L) is the correct label. We can use tf$equal to check if our prediction matches the truth.
+Well, first let’s figure out where we predicted the correct label. `tf$argmax` is an extremely useful function which gives you the index of the highest entry in a tensor along some axis. For example, `tf$argmax(y, 1L)` is the label our model thinks is most likely for each input, while `tf$argmax(y_, 1L)` is the correct label. We can use `tf$equal` to check if our prediction matches the truth.
 
 ```{r}
 correct_prediction <- tf$equal(tf$argmax(y, 1L), tf$argmax(y_, 1L))
-
 ```
 
-Note that since tensors in the TensorFlow API are 0-based we pass 1L to specify that tf$argmax should operate on the second dimension of the tensor.
+Note that since tensors in the TensorFlow API are 0-based we pass 1L to specify that `tf$argmax` should operate on the second dimension of the tensor.
 
-`correct_prediction` is a vector of booleans. To determine what fraction are correct, we cast it to floating point numbers and then take the mean. For example, (TRUE, FALSE, TRUE, TRUE) would become (1.0, 0.0, 1.0, 1.0) which would become 0.75.
+`correct_prediction` is a vector of booleans. To determine what fraction are correct, we cast it to floating point numbers and then take the mean. For example, `(TRUE, FALSE, TRUE, TRUE)` would become `(1.0, 0.0, 1.0, 1.0)` which would become 0.75.
 
 ```{r}
 accuracy <- tf$reduce_mean(tf$cast(correct_prediction, tf$float32))
@@ -231,7 +240,7 @@ Finally, we ask for our accuracy on our test data.
 
 ```{r}
 sess$run(accuracy, feed_dict=dict(x = mnist$test$images, y_ = mnist$test$labels))
-
+# [1] 0.9198
 ```
 
 
@@ -242,6 +251,7 @@ Is that good? Well, not really. In fact, it’s pretty bad. This is because we�
 What matters is that we learned from this model. Still, if you’re feeling a bit down about these results, check out the next tutorial where we do a lot better, and learn how to build more sophisticated models using TensorFlow!
 
 
-
-[stochastic training]: 
-[stochastic gradient descent]: 
+[Yann LeCun’s website]: http://yann.lecun.com/exdb/mnist/
+[stochastic training]: https://www.quora.com/Whats-the-difference-between-gradient-descent-and-stochastic-gradient-descent/answer/Abhishek-Shivkumar?srid=nBUl
+[stochastic gradient descent]: https://en.wikipedia.org/wiki/Stochastic_gradient_descent
+[softmax]: http://neuralnetworksanddeeplearning.com/chap3.html#softmax
