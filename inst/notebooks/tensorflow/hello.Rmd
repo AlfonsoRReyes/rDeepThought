@@ -16,3 +16,21 @@ b <- tf$constant(32)
 sess$run(a + b)
 ```
 
+
+```{r}
+x <- tf$placeholder(tf$float32, shape(NULL, 784L))
+W <- tf$Variable(tf$zeros(shape(784L, 10L)))
+b <- tf$Variable(tf$zeros(shape(10L)))
+```
+
+
+## Tensor extraction
+
+```{r}
+# take the elements in the first 100 rows and first 5 columns of W
+W_small <- W[1:100, 1:5]
+
+# take the last 3 columns, but all rows, of W
+W_smallish <- W[, 8:10]
+```
+
