@@ -1,0 +1,22 @@
+---
+title: "Taking an H2O Model to Production"
+output: html_notebook
+---
+
+Source: http://projects.rajivshah.com/blog/2016/08/22/H2O_prod/
+
+```{r}
+library(h2o)  
+library(Ecdat)  
+data(Icecream)  
+h2o.init()  
+train.h2o <- as.h2o(Icecream)  
+rf <- h2o.randomForest(x=2:4, y=1, ntrees=2, training_frame=train.h2o)   
+```
+
+
+```{r}
+h2o.download_pojo(rf, getjar=TRUE, path=".")
+# you must give a path to download a file
+```
+
