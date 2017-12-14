@@ -1,6 +1,22 @@
 # Log for Deep Learning
 
+-----
+## Taking an H2O Model to Production
+![](img\86e0e4a22cc95c124dcd6de069872310.png)
+### Goal, objective
+* Save the prediction model, compile it in Java for deployment
+### Uniqueness of the application
+* Shows how to generate an external file to use the prediction model in real world applications
+### Dataset
+* `Icecream` in package `Ecdat`
+### Toolbox
+* `H2O`
+### Location
+![](img\b7e738d93d4f538a973f92b2e07bf977.png)
+![](img\d9094216d195ec20ab232119988ee04c.png)
+<br>
 
+----
 ## <u>MNIST For ML Beginners</u>
 ![](img\6b5ee949d2d0e95246179c8e3faf6bec.png)
 
@@ -42,7 +58,6 @@ Remote:
 
 ## template for application
 ### Goal, objective
-* What we are trying to achieve
 ### Uniqueness of the application
 ### Dataset
 ### Toolbox
