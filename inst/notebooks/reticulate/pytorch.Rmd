@@ -69,7 +69,7 @@ test_loader = torch$utils$data$DataLoader(dataset = test_dataset,
 
 
 ```{r}
-
+class_logreg <- import("cls_logreg")
 ```
 
 

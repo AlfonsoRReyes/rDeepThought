@@ -1,0 +1,45 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(reticulate)
+use_condaenv("pytorch")
+py_config()
+```
+
+```{r}
+knitr::knit_engines$set(python = reticulate::eng_python)
+```
+
+
+```{python}
+import torch
+from torch import nn, optim
+
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from torchvision import datasets
+
+batch_size = 32
+learning_rate = 1e-2
+num_epoches = 50
+```
+
+
+```{python}
+train_dataset = datasets.MNIST(
+    root='./data', train=True, transform=transforms.ToTensor(), download=True)
+
+test_dataset = datasets.MNIST(
+    root='./data', train=False, transform=transforms.ToTensor())
+
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+```
+
+```{r}
+getwd()
+```
+

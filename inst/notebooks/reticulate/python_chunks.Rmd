@@ -1,0 +1,28 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+https://github.com/rstudio/reticulate/pull/107
+
+> No support for sharing objects between R and Python sessions in notebooks. Only `knitr` compilation.
+
+```{r}
+knitr::knit_engines$set(python = reticulate::eng_python)
+```
+
+```{r}
+library(reticulate)
+```
+
+
+```{python}
+x = 99
+print(x)
+```
+
+```{python}
+print(x)
+```

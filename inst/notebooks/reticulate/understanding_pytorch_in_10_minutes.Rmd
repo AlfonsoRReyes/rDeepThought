@@ -1,0 +1,93 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+https://hsaghir.github.io/data_science/pytorch_starter/
+
+```{r}
+library(reticulate)
+use_condaenv("pytorch")
+py_config()
+```
+
+
+```{r}
+torch      <- import("torch")
+nn         <- import("torch.nn")  # neural net library
+dsets      <- import("torchvision.datasets")
+transforms <- import("torchvision.transforms")
+autograd   <- import("torch.autograd")  #build a computational graph
+```
+
+```{r}
+F          <- import("torch.nn.functional") ## most non-linearities are here
+optim      <- import("torch.optim")  # optimization package
+```
+
+```
+# 2 matrices of size 2x3 into a 3d tensor 2x2x3
+d = [ [[1., 2.,3.], [4.,5.,6.]], [[7.,8.,9.], [11.,12.,13.]] ]
+d = torch.Tensor(d) # array from python list
+print "shape of the tensor:", d.size()
+
+# the first index is the depth
+z = d[0] + d[1]
+print "adding up the two matrices of the 3d tensor:",z
+```
+
+```{r}
+d = c(c(c(1., 2.,3.), c(4.,5.,6.)), c(c(7.,8.,9.), c(11.,12.,13.)) )
+
+```
+
+```{r}
+d <- array(1:13, c(2,2,3))
+d
+d <- torch$Tensor(d)
+print(d$size())
+```
+
+
+```{r}
+# the first index is the depth
+z = d[0] + d[1]
+z
+```
+
+```{r}
+d$view(2L, -1L)
+```
+
+
+```{r}
+x = autograd$Variable(d, requires_grad=TRUE)
+x$data$size()
+x$grad         # the grad is empty right now
+```
+
+```{r}
+y = x + 1
+```
+
+
+
+
+
+```{r}
+d <- rbind(
+    c(1., 2., 3.),
+    c(4.,5.,6.),
+    c(7.,8.,9.),
+    c(11.,12.,13.)
+)
+d
+```
+
+
+```{python}
+d = [ [[1., 2.,3.], [4.,5.,6.]], [[7.,8.,9.], [11.,12.,13.]] ]
+print(d)
+d.shape()
+```
+
