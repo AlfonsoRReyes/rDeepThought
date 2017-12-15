@@ -51,6 +51,12 @@ use_virtualenv("~/myenv")
 use_condaenv("myenv")
 ```
 
+```{r}
+library(reticulate)
+use_condaenv("pytorch")
+```
+
+
 The `use_condaenv` function will use whatever conda binary is found on the system PATH. If you want to use a specific alternate version you can use the `conda` paramter. For example:
 
 ```{r}

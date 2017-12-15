@@ -1,0 +1,81 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Source: https://www.linkedin.com/pulse/test-driving-python-integration-r-using-reticulate-package-lam/
+
+PyTorch is a python package that provides tensor computations and deep neural networks. There is no 'R torch' equivalent, but we can use reticulate in R. There is an example of training a logistic regression in pytorch, see the code here. It takes just a little rewrite of this code to make this work in R. See the first few lines in the figure below.
+
+```{r}
+library(reticulate)
+use_condaenv("pytorch")
+torch <- import("torch")
+```
+
+
+```{r}
+nn    <- import("torch.nn")
+dsets <- import("torchvision.datasets")
+```
+
+
+```{r}
+transforms <- import("torchvision.transforms")
+variable   <- import("torch.autograd")$variable
+```
+
+
+```{r}
+input_size = 784L
+num_classes = 10L
+num_epochs  = 5
+batch_size = 100L
+learning_rate = 0.001
+```
+
+
+```{r}
+train_dataset <- dsets$MNIST(
+    root = 'data',
+    train = TRUE,
+    transform = transforms$ToTensor(),
+    download = TRUE
+)
+```
+
+```{r}
+test_dataset <- dsets$MNIST(
+    root = 'data',
+    train = FALSE,
+    transform = transforms$ToTensor()
+)
+```
+
+
+```{r}
+# Dataset Loader (Input Pipline)
+train_loader = torch$utils$data$DataLoader(dataset = train_dataset, 
+                                           batch_size = batch_size, 
+                                           shuffle = TRUE)
+```
+
+
+```{r}
+test_loader = torch$utils$data$DataLoader(dataset = test_dataset, 
+                                          batch_size = batch_size, 
+                                          shuffle=FALSE)
+```
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+criterion <- nn$CrossEntropyLoss()
+```
+
