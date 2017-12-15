@@ -1,0 +1,26 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+SOurce: https://www.r-bloggers.com/r%E2%81%B6-reticulating-parquet-files/
+
+```{r}
+library(reticulate)
+
+pd <- import("pandas", "pd")
+# pa <- import("pyarrow", "pa")
+# pq <- import("pyarrow.parquet", "pq")
+```
+
+```{r}
+mtcars_py <- r_to_py(mtcars)
+mtcars_df <- pd$DataFrame$from_dict(mtcars_py)
+# mtcars_tab <- pa$Table$from_pandas(mtcars_df)
+```
+
+
+```{r}
+mtcars_df
+```
+
