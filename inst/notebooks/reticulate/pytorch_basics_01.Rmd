@@ -1,0 +1,80 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(reticulate)
+use_condaenv("pytorch")
+torch <- import("torch")
+# np <- import("numpy")
+np <- import("numpy", convert=FALSE)
+```
+
+```{r}
+torch$Tensor(5L, 4L)
+```
+
+```{r}
+torch$rand(5L, 4L)
+```
+
+```{r}
+a = torch$rand(5L, 4L)
+a$size()
+```
+
+```{r}
+np$ones(c(5L, 4L))
+```
+
+```{r}
+a = torch$rand(5L, 4L)
+b = a$numpy()
+print(b)
+```
+
+```{r}
+a = np$array(c(c(3, 4), c(3, 6)))
+b = torch$from_numpy(a)
+print(b)
+
+#  3  4
+#  3  6
+# [torch.IntTensor of size 2x2]
+```
+
+```{r}
+x = torch$rand(5L, 4L)
+y = torch$rand(5L, 4L)
+c = 3
+
+```
+
+```{r}
+c * x
+```
+
+
+```{r}
+x+y
+```
+
+```{r}
+print(x$add(y))
+```
+
+```{r}
+x$add_(y)
+```
+
+```{r}
+torch$cuda$is_available()
+```
+
+```{r}
+a = torch$rand(5L, 4L)
+a = a$cuda()
+print(a)
+```
+
