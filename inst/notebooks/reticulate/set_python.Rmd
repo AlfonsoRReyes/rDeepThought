@@ -1,0 +1,65 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+reticulate::conda_list()
+```
+
+```{r}
+reticulate::use_condaenv("r-35")
+reticulate::py_config()
+```
+
+```{r}
+reticulate::use_condaenv("r-tensorflow")
+reticulate::py_config()
+```
+
+
+```{r}
+reticulate::use_python("C:\\Users\\msfz751\\Anaconda2\\envs\\r-35\\python.exe")
+reticulate::py_config()
+reticulate::py_available()
+```
+
+```{r}
+reticulate::py_discover_config()
+reticulate::py_available()
+```
+
+```{r}
+reticulate::py_discover_config(use_environment = "r-35")
+```
+
+
+```{r}
+library(reticulate)
+# import numpy and specify no automatic Python to R conversion
+np <- import("numpy", convert = FALSE)
+
+# do some array manipulations with NumPy
+a <- np$array(c(1:4))
+sum <- a$cumsum()
+
+# convert to R explicitly at the end
+py_to_r(sum)
+```
+
+```{r}
+reticulate::py_available(initialize = TRUE)
+```
+
+## Tensorflow 
+
+```{r}
+reticulate::use_condaenv("r-tensorflow")
+reticulate::py_config()
+```
+
+```{r}
+library(keras)
+library(tensorflow)
+```
+

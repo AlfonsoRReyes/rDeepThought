@@ -14,3 +14,7 @@ py_config()
 py_discover_config()
 ```
 
+```{r}
+library(keras)
+```
+
