@@ -1,7 +1,9 @@
 ---
-title: "R Notebook"
+title: "Arrays in R and Python"
 output: html_notebook
 ---
+
+https://cran.r-project.org/web/packages/reticulate/vignettes/arrays.html
 
 ```{css}
 h2 {
@@ -17,7 +19,7 @@ h1 {
 ```
 
 ## Column-major order
-Column-major order is used by Fortran, Matlab, R, and most underlying core linear algebra libraries (BLAS). Sequential address locations are translated into array coordinates $i, j, k, ...$ so that the first array coordinates vary most rapidly with address, the next array coordinates less rapidly, and so on. For instance, four address locations 1, 2, 3, 4 are translated into a two by two matrix coordinate system $(i, j)$ as:
+Column-major order is used by Fortran, Matlab, R, and most underlying core linear algebra libraries (BLAS). Sequential address locations are translated into array coordinates $i, j, k, ...$ so that the **first array coordinates vary most rapidly with address**, the next array coordinates less rapidly, and so on. For instance, four address locations 1, 2, 3, 4 are translated into a two by two matrix coordinate system $(i, j)$ as:
 
 ```{text}
 address   i  j
@@ -45,6 +47,37 @@ address   i  j  k
 
 In the example above, the dimension `k` changes the slowest, then `j`, and `i` changes the fastest.
 
+## Row-major order
+Row-major ordering is a different translation between sequential address indices and array coordinates, instead laying sequential data in memory across rows in matrices. Row-major ordering is sometimes called “C” style ordering and column-major ordering “Fortran” style. Python/NumPy refers to the orderings in array flags as C_CONTIGUOUS and F_CONTIGUOUS, respectively. For instance address locations 1, 2, 3, 4 are translated into a 2x2 matrix coordinate system (i, j) as:
+
+```{text}
+address   i  j
+  1       1  1
+  2       1  2
+  3       2  1
+  4       2  2
+```  
+Efficient wrappers to BLAS routines exist for row-major ordered arrays. For completeness, here is a 2x2x2 3-d example layout:
+
+```{text}
+address   i  j  k
+  1       1  1  1
+  2       1  1  2
+  3       1  2  1
+  4       1  2  2
+  5       2  1  1
+  6       2  1  2
+  7       2  2  1
+  8       2  2  2
+```
+
+And similarly to above a formula for this example that converts these 1-based array coordinates to address indices is: 
+a = k + (j - 1) * d3 + (i - 1) * d3 * d2.
+
+See the following notes for a general formula for row- and column-order coordinate to address mapping, but note the use of zero-based indexing.
+
+https://en.wikipedia.org/wiki/Row-_and_column-major_order#Address_calculation_in_general
+https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html
 
 ## Arrays in R
 R displays array data with unambiguously-labeled coordinate indices. 
