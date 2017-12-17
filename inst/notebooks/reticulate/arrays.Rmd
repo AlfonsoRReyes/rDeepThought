@@ -5,18 +5,6 @@ output: html_notebook
 
 https://cran.r-project.org/web/packages/reticulate/vignettes/arrays.html
 
-```{css}
-h2 {
-  color: blue;
-  text-decoration: underline;
-}
-
-h1 {
-  color: brown;
-  text-align: center;
-  text-shadow: 3px 2px gray;
-}
-```
 
 ## Column-major order
 Column-major order is used by Fortran, Matlab, R, and most underlying core linear algebra libraries (BLAS). Sequential address locations are translated into array coordinates $i, j, k, ...$ so that the **first array coordinates vary most rapidly with address**, the next array coordinates less rapidly, and so on. For instance, four address locations 1, 2, 3, 4 are translated into a two by two matrix coordinate system $(i, j)$ as:
@@ -57,6 +45,7 @@ address   i  j
   3       2  1
   4       2  2
 ```  
+
 Efficient wrappers to BLAS routines exist for row-major ordered arrays. For completeness, here is a 2x2x2 3-d example layout:
 
 ```{text}
@@ -86,23 +75,39 @@ R displays array data with unambiguously-labeled coordinate indices.
 array(1:24, c(4,3,2))
 ```
 
-Python doesn't show this and displays $n$-d array data in different order than R (making matters somewhat confusing for R users). Consider the following example that creates and displays identical 4x3x2 arrays in R and Python:
+Python doesn't show this and displays $n$-d array data in different order than R (making matters somewhat confusing for R users). Consider the following example that creates and displays identical `4x3x2` arrays in R and Python:
+
+```{r}
+# run this firsrt to check Python is installed
+reticulate::py_config()
+```
+
+```{r}
+# load pytorch
+library(reticulate)
+use_condaenv("pytorch")
+py_config()
+```
 
 Here is a Python script using the knitr engine:
 
->  Note. ‘F’ means to read / write the elements using `Fortran`-like index order, with the first index changing fastest, and the last index changing slowest. 
+>  Note. The ‘F’ at the end of the `reshape` function means to read / write the elements using `Fortran`-like index order, with the first index changing fastest, and the last index changing slowest. 
+
 
 ```{python}
 import numpy as np
-print np.reshape(np.arange(1, 25), (4, 3, 2), "F")   # "F"" means like-Fortran
+xpy = np.reshape(np.arange(1, 25), (4, 3, 2), "F") 
+print(xpy)   # "F"" means like-Fortran
 ```
+
+> This array should be the same as the one we just generated above in R.
+But they don't look the same. Let's visualize the Python array as an R array.
+Unfortunately we cannot transfer Python values to R values inside the notebook.
+We have to use the package `reticulate`.
 
 It's easier to know which coordinates go where in R because they are labeled.
 
 Python, using column-major ordering, displays the same thing but in a different order where the first indices are grouped together in order. To see that these arrays are, in fact, the same, let's pick out values along just the first "row", that is values with a first index of 1 (R) or 0 (Python):
-
-
-
 
 
 And this same example using `reticulate`:
@@ -425,3 +430,16 @@ op$sub(y.py, x.py)
 
 That's it. This is the inverse process of the example on row-major above.
 
+
+```{css}
+h2 {
+  color: blue;
+  text-decoration: underline;
+}
+
+h1 {
+  color: brown;
+  text-align: center;
+  text-shadow: 3px 2px gray;
+}
+```
