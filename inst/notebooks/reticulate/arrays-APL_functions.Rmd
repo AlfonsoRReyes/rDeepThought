@@ -1,0 +1,93 @@
+---
+title: "Some APL array functions"
+output: html_notebook
+---
+
+Source: https://rpubs.com/deleeuw/158476
+
+## APL functions
+
+```{r}
+# shape
+
+aplShape <- function(a) {
+  if (is.vector(a))
+    return(length(a))
+  return(dim(a))
+}
+
+#  rank
+
+aplRank <- function(a) {
+  aplShape(aplShape(a))
+}
+
+# aplTranspose <- function(a, x = rev(1:aplRank(a))) {
+#     list(x = x, a = a)
+# } 
+
+butLast <- function(x) {
+  return(x[-length(x)])
+}
+
+aplEncode <- function(rrr, base) {
+  b <- c(1, butLast(cumprod(base)))
+  r <- rep(0, length(b))
+  s <- rrr - 1
+  for (j in length(base):1) {
+    r[j] <- s %/% b[j]
+    s <- s - r[j] * b[j]
+  }
+  return(1 + r)
+}
+
+aplDecode <- function(ind, base) {
+  b <- c(1, butLast(cumprod(base)))
+  return(1 + sum(b * (ind - 1)))
+}
+
+# get
+
+aplGet <- function(a, cell) {
+  dims <- dim(a)
+  n <- length(dims)
+  b <- 0
+  if (any(cell > dims) || any(cell < 1))
+    stop("No such cell")
+  return(a[aplDecode(cell, dims)])
+}
+
+aplTranspose <- function(a, x = rev(1:aplRank(a))) {
+  sa <- aplShape(a)
+  ra <- aplRank(a)
+  if (length(x) != ra)
+    stop("Length Error")
+  rz <- max(x)
+  sz <- rep(0, rz)
+  for (i in 1:rz)
+    sz[i] <- min(sa[which(x == i)])
+  nz <- prod(sz)
+  z <- array(0, sz)
+  for (i in 1:nz)
+    z[i] <- a[aplDecode(aplEncode(i, sz)[x], sa)]
+  return(z)
+}
+
+```
+
+```{r}
+# array(1:25, c(2,3,4))
+print("original array")
+(aT <- aplTranspose(array(1:25, c(2,3,4))))
+# aplTranspose(aT)
+
+# 4 times taking the transpose
+print("4 times taking the transpose")
+(aT4 <- aplTranspose(aplTranspose(aplTranspose(aplTranspose(aT)))))
+
+identical(aT, aT4)
+# TRUE
+
+print("difference")
+aT - aT4
+```
