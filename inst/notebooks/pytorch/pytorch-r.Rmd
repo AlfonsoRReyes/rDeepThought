@@ -11,16 +11,9 @@ PyTorch is a python package that provides tensor computations and deep neural ne
 library(reticulate)
 use_condaenv("pytorch")
 torch <- import("torch")
-```
 
-
-```{r}
 nn    <- import("torch.nn")
 dsets <- import("torchvision.datasets")
-```
-
-
-```{r}
 transforms <- import("torchvision.transforms")
 variable   <- import("torch.autograd")$variable
 ```

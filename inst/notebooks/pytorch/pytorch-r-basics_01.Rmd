@@ -6,6 +6,11 @@ output: html_notebook
 ```{r}
 library(reticulate)
 use_condaenv("pytorch")
+py_config()
+```
+
+
+```{r}
 torch <- import("torch")
 # np <- import("numpy")
 np <- import("numpy", convert=FALSE)
