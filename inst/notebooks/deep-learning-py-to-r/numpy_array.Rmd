@@ -14,6 +14,7 @@ np <- import("numpy", convert=FALSE)
 
 
 ```{r}
+# this is a row-major array
 (y <- py_to_r(x))
 ```
 
