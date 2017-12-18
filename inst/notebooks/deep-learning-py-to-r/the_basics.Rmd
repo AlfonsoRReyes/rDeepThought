@@ -379,3 +379,15 @@ reticulate::r_to_py(array(v, c(2, 3)))
 The array 2x3 looks exactly the same as in Python.
 But we have to be careful, because this order won't work above 2-D dimension.
 
+```{r}
+normalizeRows <- function(x) {
+    x_norm <-  norm(x, "F")
+    x <- x / x_norm
+    return(x)
+}
+
+v <- c(0, 1, 3, 6, 4, 4)
+a <- r_row_major(v, c(2, 3))
+normalizeRows(a)
+```
+
