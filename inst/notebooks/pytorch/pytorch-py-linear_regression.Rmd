@@ -3,7 +3,15 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This script generates a plot.
+
+Source: https://raw.githubusercontent.com/yunjey/pytorch-tutorial/master/tutorials/01-basics/linear_regression/main.py
+
+```{r}
+library(reticulate)
+use_condaenv("pytorch")
+py_config()
+```
+
 
 ```{python}
 import torch
