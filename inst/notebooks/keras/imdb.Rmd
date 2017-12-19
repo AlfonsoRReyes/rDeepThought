@@ -1,0 +1,65 @@
+---
+title: "IMDB"
+output: html_notebook
+---
+
+
+```{r}
+library(keras)
+
+imdb <- dataset_imdb(num_words = 10000)
+c(c(train_data, train_labels), c(test_data, test_labels)) %<-% imdb
+```
+
+
+```{r}
+imdb <- dataset_imdb(num_words = 10000)
+train_data   <- imdb$train$x
+train_labels <- imdb$train$y
+test_data    <- imdb$test$x
+test_labels  <- imdb$test$y
+```
+
+
+train_labels and test_labels are
+lists of 0s and 1s, where 0 stands for negative and 1 stands for positive
+
+```{r}
+str(train_data[[1]])
+train_labels[[1]]
+```
+
+
+```{r}
+word_index <- dataset_imdb_word_index()
+
+reverse_word_index <- names(word_index)
+names(reverse_word_index) <- word_index
+```
+
+```{r}
+decoded_review <- sapply(train_data[[1]], function(index) {
+  word <- if (index >= 3) reverse_word_index[[as.character(index - 3)]]
+  if (!is.null(word)) word else "?"
+})
+```
+
+```{r}
+head(decoded_review)
+```
+
+
+```{r}
+vectorize_sequences <- function(sequences, dimension = 10000) {
+
+  results <- matrix(0, nrow = length(sequences), ncol = dimension)
+  for (i in 1:length(sequences))
+
+    results[i, sequences[[i]]] <- 1
+  results
+}
+
+x_train <- vectorize_sequences(train_data)
+x_test <- vectorize_sequences(test_data)
+```
+
