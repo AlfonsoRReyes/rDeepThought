@@ -17,6 +17,8 @@ library(vtreat)
 
 Download data from: https://data.world/landeranalytics/nyc-pluto
 
+This dataset is about property lots in Manhattan and includes descriptive information as well as value. The original data are available from NYC Planning and the prepared files seen here at the Lander Analytics data.world repo.
+
 ```{r}
 dataDir <- "."
 data_train <- readr::read_csv(file.path(dataDir, 'manhattan_Train.csv'))
@@ -37,33 +39,43 @@ data_test <- data_test %>%
            -SchoolDistrict, -Council, -PolicePrct, -HealthArea)
 ```
 
+```{r}
+summary(data_train)
+```
+
 
 Here is a visualization of the class balance. Using `rBokeh`.
 
 ```{r}
 dataList <- list(data_train, data_validate, data_test)
 dataList %>% 
-    purrr::map(function(x) figure(width=600/NROW(dataList), height=500, legend_location=NULL) %>% 
-                   ly_bar(x=High, color=factor(High), data=x, legend='code')
-    ) %>% 
+    purrr::map(function(x) figure(width=600 / NROW(dataList), 
+                                  height=500, legend_location=NULL) %>% 
+                   ly_bar(x=High, color=factor(High), data=x, legend='code')) %>% 
     grid_plot(nrow=1, ncol=NROW(dataList), same_axes=TRUE)
+```
+
+```{r}
+# The column name for the response
+responseName <- 'High'
+
+# The target value for the response
+responseTarget <- TRUE
+
+# The remaining columns are predictors
+varNames <- setdiff(names(data_train), responseName)
+varNames
 ```
 
 
 We use `vtreat` to do some automated feature engineering.
 
 ```{r}
-# The column name for the response
-responseName <- 'High'
-# The target value for the response
-responseTarget <- TRUE
-# The remaining columns are predictors
-varNames <- setdiff(names(data_train), responseName)
 
 # build the treatment design
-treatmentDesign <- designTreatmentsC(dframe=data_train, varlist=varNames, 
-                                     outcomename=responseName, 
-                                     outcometarget=responseTarget, 
+treatmentDesign <- designTreatmentsC(dframe = data_train, varlist=varNames, 
+                                     outcomename = responseName, 
+                                     outcometarget = responseTarget, 
                                      verbose=TRUE)
 ```
 
@@ -72,9 +84,9 @@ Then we create train, validate and test matrices.
 
 ```{r}
 # build design data.frames
-dataTrain <- prepare(treatmentplan=treatmentDesign, dframe=data_train)
+dataTrain    <- prepare(treatmentplan=treatmentDesign, dframe=data_train)
 dataValidate <- prepare(treatmentplan=treatmentDesign, dframe=data_validate)
-dataTest <- prepare(treatmentplan=treatmentDesign, dframe=data_test)
+dataTest     <- prepare(treatmentplan=treatmentDesign, dframe=data_test)
 
 # use all the level names as predictors
 predictorNames <- setdiff(names(dataTrain), responseName)
@@ -114,24 +126,34 @@ We build the model symbolically. We use a feedforward network with two hidden la
 net <- mx.symbol.Variable('data') %>%
     # drop out 20% of predictors
     mx.symbol.Dropout(p=0.2, name='Predictor_Dropout') %>%
+    
     # a fully connected layer with 256 units
     mx.symbol.FullyConnected(num_hidden=256, name='fc_1') %>%
+    
     # batch normalize the units
     mx.symbol.BatchNorm(name='bn_1') %>%
+    
     # use the rectified linear unit (relu) for the activation function
     mx.symbol.Activation(act_type='relu', name='relu_1') %>%
+    
     # drop out 50% of the units
     mx.symbol.Dropout(p=0.5, name='dropout_1') %>%
+    
     # a fully connected layer with 128 units
     mx.symbol.FullyConnected(num_hidden=128, name='fc_2') %>%
+    
     # batch normalize the units
     mx.symbol.BatchNorm(name='bn_2') %>%
+    
     # use the rectified linear unit (relu) for the activation function
     mx.symbol.Activation(act_type='relu', name='relu_2') %>%
+    
     # drop out 50% of the units
     mx.symbol.Dropout(p=0.5, name='dropout_2') %>%
+    
     # fully connect to the output layer which has just the 1 unit
     mx.symbol.FullyConnected(num_hidden=1, name='out') %>%
+    
     # use the sigmoid output
     mx.symbol.LogisticRegressionOutput(name='output')
 ```
@@ -171,7 +193,7 @@ mod_net <- mx.model.FeedForward.create(
     X                 = trainX, # the predictors
     y                 = trainY, # the response
     optimizer         = "adam", # using the Adam optimization method
-    eval.data         = list(data=validateX, label=validateY), # validation data
+    eval.data         = list(data = validateX, label = validateY), # validation data
     ctx               = mx.cpu(), # use the cpu for training
     eval.metric       = mx.metric.mlogloss, # evaluate with log-loss
     num.round         = 50,     # 50 epochs
@@ -185,7 +207,11 @@ mod_net <- mx.model.FeedForward.create(
 Statisticians call this step prediction while the deep learning field calls it inference which has an entirely different meaning in statistics.
 
 ```{r}
-preds_net <- predict(mod_net, testX, array.layout="rowmajor") %>% t
+preds_net <- predict(mod_net, testX, array.layout = "rowmajor") %>% t
 preds_net
+```
+
+```{r}
+mod_net
 ```
 
