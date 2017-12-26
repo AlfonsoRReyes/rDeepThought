@@ -96,6 +96,7 @@ max(data.Normalization(dat, "n4"))
 min(data.Normalization(dat, "n4"))
 ```
 
+### Using `clusterSim` for normalization
 ```{r}
 library(clusterSim)
 # n4  - unitization with zero minimum ((x - x.min)/range), range: (x.max - x.min)
