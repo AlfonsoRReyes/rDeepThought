@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Source: https://rpubs.com/zkajdan/328344
+
+## Step 1: Prepare the data
+
+```{r}
+x_train <- iris[1:120, "Petal.Length"]
+y_train <- iris[1:120, "Petal.Width"]
+x_test <- iris[121:150, "Petal.Length"]
+y_test <- iris[121:150, "Petal.Width"]
+```
+
+
+
+## Step 2: Define the model
+
+```{r}
+library(keras)
+
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 8, input_shape = 1) %>% # hidden layer with 8 neurons, 1-dimensional input
+  layer_activation_leaky_relu() %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 1) # output layer with linear activation
+
+# model %>% summary() # params: num_hidden weights and biases each to hidden layer, 8 weights and 1 bias to output neuron
+
+model %>% 
+    compile(optimizer = "adam", loss = "mean_squared_error")
+```
+
+## Step 3: Train the model
+
+```{r}
+hist <-
+  model %>% fit(
+    x_train,
+    y_train,
+    batch_size = 10,
+    epochs = 100
+  )
+
+model %>% 
+    save_model_hdf5("iris.h5")
+
+plot(hist)
+```
+
+
+## Step 4: Test the model
+
+```{r}
+model <- load_model_hdf5("iris.h5")
+model %>% 
+    evaluate(x_test, y_test)
+```
+
+
+```{r}
+preds_train <- model %>% predict(x_train)
+preds_test  <- model %>% predict(x_test)
+```
+
+
+
+```{r fig.asp=1}
+plot(x_train, y_train)
+lines(x_train, preds_train, col = "blue")
+```
+
+```{r}
+data.frame(preds_train, y_train)
+```
+
+```{r fig.asp=1}
+plot(x_test, y_test)
+lines(x_test, preds_test, col = "blue")
+```
+
+```{r}
+```
+

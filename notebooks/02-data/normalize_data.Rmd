@@ -1,0 +1,165 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Using the `scale` function
+
+https://stackoverflow.com/a/15215483/5270873
+
+I have to assume you meant to say that you wanted a mean of 0 and a standard deviation of 1. If your data is in a dataframe and all the columns are numeric you can simply call the scale function on the data to do what you want.
+
+```{r}
+dat <- data.frame(x = rnorm(10, 30, .2), y = runif(10, 3, 5))
+dat
+scaled.dat <- scale(dat)
+
+# check that we get mean of 0 and sd of 1
+colMeans(scaled.dat)  # faster version of apply(scaled.dat, 2, mean)
+apply(scaled.dat, 2, sd)
+```
+
+https://stackoverflow.com/a/27617943/5270873
+'Caret' package provides methods for preprocessing data (e.g. centering and scaling). You could also use the following code:
+
+```{r}
+library(caret)
+
+spam <- matrix(rnorm(58*3500, 30, .2), nrow = 3500, ncol = 58)
+
+# Assuming goal class is column 10
+preObj  <- preProcess(spam[, -10], method=c("center", "scale"))
+newData <- predict(preObj, spam[, -10])
+
+preObj$mean
+preObj$std
+```
+
+## Scale selected variables
+
+https://stackoverflow.com/a/30229426/5270873
+Realizing that the question is old and one answer is accepted, I'll provide another answer for reference.
+
+scale is limited by the fact that it scales all variables. The solution below allows to scale only specific variable names while preserving other variables unchanged (and the variable names could be dynamically generated):
+
+
+```{r}
+library(dplyr)
+
+set.seed(1234)
+dat <- data.frame(x = rnorm(10, 30, .2), 
+                  y = runif(10, 3, 5),
+                  z = runif(10, 10, 20))
+dat
+
+dat2 <- dat %>% 
+    mutate_each_(funs(scale(.) %>% as.vector), vars=c("y", "z"))
+
+# dat2
+colMeans(dat2)        # y, z: 0
+apply(dat2, 2, sd)    # y, z: 1
+```
+
+## Using package `recommenderlab`
+https://stackoverflow.com/a/32651806/5270873
+Use the package "recommenderlab". Download and install the package. This package has a command "Normalize" in built. It also allows you to choose one of the many methods for normalization namely 'center' or 'Z-score' Follow the following example:
+
+```{r}
+library(recommenderlab)
+## create a matrix with ratings
+m <- matrix(sample(c(NA,0:5),50, replace=TRUE, 
+                   prob=c(.5, rep(.5/6,6))), nrow=5, ncol=10, 
+            dimnames = list(users = paste('u', 1:5, sep="_"), 
+                            items = paste('i', 1:10, sep="_")))
+
+dim(m)
+
+## do normalization
+r <- as(m, "realRatingMatrix")
+#here, 'centre' is the default method
+r_n1 <- normalize(r) 
+#here "Z-score" is the used method used
+r_n2 <- normalize(r, method="Z-score")
+
+r
+r_n1
+r_n2
+
+## show normalized data
+image(r, main="Raw Data")
+image(r_n1, main="Centered")
+image(r_n2, main="Z-Score Normalization")
+```
+
+```{r}
+m   # raw data
+recommenderlab::getData.frame(r)
+r_n1.df <- recommenderlab::getData.frame(r_n1) 
+r_n2.df <- recommenderlab::getData.frame(r_n2)   # z-score normalization
+
+mean(r_n2.df$rating)  # faster version of apply(scaled.dat, 2, mean)
+sd(r_n2.df$rating)
+```
+
+```{r}
+clusterSim::data.Normalization(m, )
+```
+
+
+## Using package `clusterSim`
+https://stackoverflow.com/a/35427058/5270873
+You can easily normalize the data also using data.Normalization function in clusterSim package. It provides different method of data normalization.
+
+```{r}
+library(clusterSim)
+
+# without normalization
+data.Normalization(dat, type = "n0", normalization = "column")
+
+data.Normalization(dat, type = "n1", normalization = "column")
+
+data.Normalization(dat, type = "n2", normalization = "column")
+
+data.Normalization(dat, type = "n13", normalization = "column")
+
+```
+
+    n0  - without normalization
+    n1  - standardization ((x-mean)/sd)
+    n2  - positional standardization ((x-median)/mad)
+    n3  - unitization ((x-mean)/range)
+    n3a - positional unitization ((x-median)/range)
+    n4  - unitization with zero minimum ((x-min)/range)
+    n5  - normalization in range <-1,1> ((x-mean)/max(abs(x-mean)))
+    n5a - positional normalization in range <-1,1> ((x-median)/max(abs(x-median)))
+    n6  - quotient transformation (x/sd)
+    n6a - positional quotient transformation (x/mad)
+    n7  - quotient transformation (x/range)
+    n8  - quotient transformation (x/max)
+    n9  - quotient transformation (x/mean)
+    n9a - positional quotient transformation (x/median)
+    n10 - quotient transformation (x/sum)
+    n11 - quotient transformation (x/sqrt(SSQ))
+    n12 - normalization ((x-mean)/sqrt(sum((x-mean)^2)))
+    n12a - positional normalization ((x-median)/sqrt(sum((x-median)^2)))
+    n13 - normalization with zero being the central point ((x-midrange)/(range/2))
+
+
+## Scaling by columns
+https://stackoverflow.com/a/46832183/5270873
+Scale can be used for both full data frame and specific columns. For specific columns, following code can be used:
+
+```{r}
+trainingSet <- m
+trainingSet[, 3:7] = scale(trainingSet[, 3:7]) # For column 3 to 7
+trainingSet[, 8] = scale(trainingSet[, 8]) # For column 8 
+trainingSet
+```
+
+```{r}
+trainingSet <- m
+trainingSet <- scale(trainingSet)
+trainingSet
+```
+
+

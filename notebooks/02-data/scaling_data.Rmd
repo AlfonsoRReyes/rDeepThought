@@ -1,0 +1,129 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+https://stackoverflow.com/a/15215483/5270873
+
+```{r}
+dat <- data.frame(x = rnorm(20, 30, .2), y = runif(20, 3, 5))
+colMeans(dat)
+apply(dat, 2, sd)
+scaled.dat <- scale(dat)
+
+# check that we get mean of 0 and sd of 1
+colMeans(scaled.dat)  # faster version of apply(scaled.dat, 2, mean)
+apply(scaled.dat, 2, sd)
+```
+
+> The `scale` function is equivalent to `data.Normalization(dat, "n1")`.
+
+```{r}
+# n1  - standardization ((x-mean)/sd)
+library(clusterSim)
+
+colMeans(data.Normalization(dat, "n1"))
+apply(data.Normalization(dat, "n1"), 2, sd)
+
+all.equal(tolerance = 1e-14,
+    colMeans(scale(dat)),
+    colMeans(data.Normalization(dat, "n1"))    
+)
+```
+
+## Build own z-score function
+> The `independent` variables should be converted tp `z-scores`.
+
+```{r}
+zscore <- function(x) (x - mean(x) ) / sd(x)
+
+colMeans(data.frame(x = zscore(dat$x), 
+                    y = zscore(dat$y)))
+
+apply(data.frame(x = zscore(dat$x), 
+                    y = zscore(dat$y)), 2, sd)
+```
+
+### using the `caret` package for standardization
+
+```{r}
+library(caret)
+
+preprocessParams <- preProcess(dat, method=c("center", "scale"))
+print(preprocessParams)
+transformed <- predict(preprocessParams, dat)
+summary(transformed)
+apply(transformed, 2, sd)
+```
+
+
+
+## Build dependent variables transformation function
+The `dependent` variables should be converted to the range `[0, 1]`.
+
+```{r}
+dependent.trans <- function(y) { (y - min(y)) / (max(y) - min(y)) }
+
+colMeans(data.frame(x = dependent.trans(dat$x), 
+                    y = dependent.trans(dat$y)))
+
+apply(data.frame(x = dependent.trans(dat$x), 
+                 y = dependent.trans(dat$y)), 2, sd)
+
+c(max = max(data.frame(x = dependent.trans(dat$x), 
+                    y = dependent.trans(dat$y))), 
+  min = min(data.frame(x = dependent.trans(dat$x), 
+                    y = dependent.trans(dat$y)))
+)
+
+```
+
+## Verifying that `max` is 1 and `min` is 0
+
+```{r}
+sapply(data.frame(x = dependent.trans(dat$x), 
+            y = dependent.trans(dat$y)), max)
+sapply(data.frame(x = dependent.trans(dat$x), 
+            y = dependent.trans(dat$y)), min)
+```
+
+## Applying `n4` normalization with `clusterSim` package
+
+```{r}
+# n4  - unitization with zero minimum ((x.min)/range)
+#       where range is (x.max - x.min)
+max(data.Normalization(dat, "n4"))
+min(data.Normalization(dat, "n4"))
+```
+
+```{r}
+library(clusterSim)
+# n4  - unitization with zero minimum ((x - x.min)/range), range: (x.max - x.min)
+
+dependent.trans <- function(y) { (y - min(y)) / (max(y) - min(y)) }
+
+all.equal(
+    sapply(data.Normalization(dat, "n4"), max),
+    sapply(data.frame(x = dependent.trans(dat$x), 
+                      y = dependent.trans(dat$y)), max)
+)
+
+all.equal(
+    sapply(data.Normalization(dat, "n4"), min),
+    sapply(data.frame(x = dependent.trans(dat$x), 
+                      y = dependent.trans(dat$y)), min)
+)
+```
+
+### Scaling into the range [0, 1] (normalization)
+
+```{r}
+library(caret)
+
+preprocessParams <- preProcess(dat, method=c("range"))
+print(preprocessParams)
+transformed <- predict(preprocessParams, dat)
+summary(transformed)
+apply(transformed, 2, sd)
+```
+

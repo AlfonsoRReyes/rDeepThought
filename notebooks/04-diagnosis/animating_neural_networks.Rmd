@@ -1,0 +1,198 @@
+---
+title: "Animation of Neural Networks"
+output: html_notebook
+---
+
+```{r}
+require(clusterGeneration)
+require(nnet)
+ 
+set.seed(2)
+num.vars<-8
+num.obs<-1000
+ 
+#arbitrary correlation matrix and random variables
+cov.mat<-genPositiveDefMat(num.vars,covMethod=c("unifcorrmat"))$Sigma
+rand.vars<-mvrnorm(num.obs,rep(0,num.vars),Sigma=cov.mat)
+parms<-runif(num.vars,-10,10)
+ 
+#response variable as linear combination of random variables and random error term
+y<-rand.vars %*% matrix(parms) + rnorm(num.obs,sd=20)
+ 
+#prepare data for use with nnet and plot.nnet
+rand.vars<-data.frame(rand.vars)
+y<-data.frame((y-min(y))/(max(y)-min(y)))
+names(y)<-'y'
+```
+
+```{r}
+require(devtools)
+# source_gist('5086859') #loaded as 'plot.nnet' in the workspace
+source_url('https://gist.githubusercontent.com/fawda123/7471137/raw/466c1474d0a505ff044412703516c34f1a4684a5/nnet_plot_update.r')
+```
+
+```{r}
+#get vector of T/F that is used to subset data for training
+set.seed(3) 
+train.dat<-rep(F,num.obs)
+train.dat[sample(num.obs,600)]<-T
+ 
+num.it<-100 #number of training iterations
+ 
+err.dat<-matrix(ncol=2,nrow=num.it) #object for appending errors
+ 
+for(i in 1:num.it){
+     
+    #to monitor progress
+    cat(i,'\n') 
+    flush.console()
+     
+    #to ensure same set of random starting weights are used each time
+    set.seed(5)
+     
+    #temporary nnet model
+    mod.tmp<-nnet(rand.vars[train.dat,],y[train.dat,],size=10,linout=T,maxit=i,trace=F)
+     
+    #training and test errors
+    train.err<-sqrt(mod.tmp$value/sum(train.dat))
+    test.pred<-predict(mod.tmp,newdata=rand.vars[!train.dat,])
+    test.err<-sqrt(sum((test.pred-y[!train.dat,])^2)/sum(!train.dat))
+     
+    #append error after each iteration
+    err.dat[i,]<-c(train.err,test.err)
+         
+    }
+```
+
+```{r}
+#make animation
+require(animation)
+ 
+num.it<-100
+ 
+#this vector is needed for proper scaling of weights in the plot 
+max.wt<-0
+for(i in 1:num.it){
+  set.seed(5)
+  mod.tmp <- nnet(rand.vars[train.dat,],y[train.dat,,drop=F],size=10,linout=T,maxit=i-1,trace=F)
+  if(max(abs(mod.tmp$wts))>max.wt) max.wt<-max(abs(mod.tmp$wts))
+  }
+ 
+ani.options(outdir = '.') #your local path
+saveHTML(
+  {
+  for(i in 1:num.it){
+   
+    #plot.nnet
+    par(mfrow=c(1,2),mar=c(0,0,1,0),family='serif')
+    set.seed(5)
+    mod.tmp<-nnet(rand.vars[train.dat,],y[train.dat,,drop=F],size=10,linout=T,maxit=i-1,trace=F)
+    rel.rsc.tmp<-1+6*max(abs(mod.tmp$wts))/max(max.wt)    #this vector sets scale for line thickness
+    plot.nnet(mod.tmp,nid=T,rel.rsc=rel.rsc.tmp,alpha.val=0.8,
+        pos.col='darkgreen',neg.col='darkblue',circle.col='brown',xlim=c(0,100))
+ 
+    #plot error
+    plot(seq(0,num.it)[c(1:i)],err.dat[,2][c(1:i)],type='l',col='darkgrey',bty='n',ylim=c(-0.1,0.5),
+        xlim=c(-15,num.it+15),axes=F,ylab='RMSE',xlab='Iteration',lwd=2,cex.lab=1.3)
+    axis(side=1,at=seq(0,num.it,length=5),line=-4)
+    mtext(side=1,'Iteration',line=-2)
+    axis(side=2,at=c(seq(0,0.4,length=5)),line=-3)
+    mtext(side=2,'RMSE',line=-1)
+    lines(seq(0,num.it)[c(1:i)],err.dat[c(1:i),1],type='l',col='red',lwd=2)
+    lines(seq(0,num.it)[c(1:i)],err.dat[c(1:i),2],type='l',col='green',lwd=2)
+   
+    title(paste('Iteration',i,'of',num.it),outer=T,line=-2)
+    }
+  },
+   
+  interval = 0.15, ani.width = 700, ani.height = 350, ani.opts='controls'
+   
+  )
+```
+ 
+ The first argument to saveHTML is an expression where we can include anything we want to plot. We’ve created an animation of 100 training iterations by successively increasing the total number of training iterations using a loop. The code prior to saveHTML is not necessary for plotting but ensures that the line widths for the neural interpretation diagram are consistent from the first to last training iteration. In other words, scaling of the line widths is always in proportion to the maximum weight that was found in all of the training iterations. This creates a plot that allows for more accurate visualization of weight changes. The key arguments in the call to saveHTML are interval (frame rate), ani.width (width of animation), and ani.height (height of animation). You can view the animation by clicking on the image below.
+
+The animation on the left shows the weight changes with additional training iterations using a neural interpretation diagram. Line color and width is proportional to sign and magnitude of the weight. Positive weights are dark green and negative weights are dark blue. The animation on the right shows the prediction errors (RMSE) for the training (red) and test (green) datasets. Note the rapid decline in error with the first few training iterations, then marginal improvement with additional training. Also note the increase in error for the test dataset.
+
+We can also look at the predicted values compared to the observed values as a function of model training. The values should be very similar if our neural network model has sufficiently characterized the relationships between our variables. We can use the saveHTML function again to create the animation for a series of loops through the training iterations. We’ll plot the predicted values against the observed values for each dataset with some help from ggplot2.
+
+
+
+
+
+
+
+
+```{r}
+#make animations, pred vs obs
+require(ggplot2)
+ 
+#create color scheme for group points, overrides default for ggplot
+myColors<-c('red','green')
+names(myColors)<-c('training','test')
+colScale<-scale_colour_manual(name = "grps",values = myColors)
+ 
+#function for getting rmse of prediction, used to plot text
+rmse.fun<-function(dat.in,sub.in)
+    format(sqrt(sum((dat.in[sub.in,]-y[sub.in,])^2)/sum(sub.in)),nsmall=4,digits=4)
+ 
+options(outdir = '.') #your local path
+saveHTML(
+  {
+  for(i in 1:num.it){
+   
+     #temporary nnet mod for the loop
+     mod.tmp<-nnet(rand.vars[train.dat,],y[train.dat,,drop=F],size=10,linout=T,maxit=i,trace=F)
+     
+     #predicted values and factor variable defining training and test datasets
+     pred.vals<-predict(mod.tmp,new=rand.vars)   
+     sub.fac<-rep('test',length=num.obs)
+     sub.fac[train.dat]<-'training'
+     sub.fac<-factor(sub.fac,c('training','test'))
+     
+     #data frame to plot
+     plot.tmp<-data.frame(cbind(sub.fac,pred.vals,y))
+     names(plot.tmp)<-c('Group','Predicted','Observed')
+     
+     #plot title
+     title.val<-paste('Iteration',i,'of',num.it)  
+   
+     #RMSE of prediction, used for plot text, called using geom_text in ggplot
+     rmse.val<-data.frame(
+        Group=factor(levels(sub.fac),c('training','test')),
+        rmse=paste('rmse =',c(rmse.fun(pred.vals,train.dat),rmse.fun(pred.vals,!train.dat))),
+        x.val=rep(0.9,2),
+        y.val=rep(0.1,2)
+        )
+     
+     #ggplot object
+     p.tmp<-ggplot(data=plot.tmp, aes(x=Observed,y=Predicted,group=Group,colour=Group)) + 
+        geom_abline() +
+        geom_point(size=6,alpha=0.5) +
+        scale_x_continuous(limits=c(0,1)) +
+        scale_y_continuous(limits=c(0,1)) + 
+        facet_grid(.~Group) +
+        theme_bw() +
+        colScale +
+        geom_text(data=rmse.val, aes(x=x.val,y=y.val,label=rmse,group=Group),colour="black",size=4) +
+        ggtitle(title.val) +
+        theme(
+           plot.title=element_text(vjust=2,size=18),
+           legend.position='none'
+           )
+     
+     print(p.tmp)
+     
+     }
+     
+  },
+     
+  interval = 0.15, ani.width = 700, ani.height = 350, ani.opts='controls'
+     
+  )
+```
+
+The animation on the left shows the values for the training dataset and the animation on the right shows the values for the test dataset. Both datasets are poorly predicted in the first ten or so training iterations. Predictions stabilize and approximate the observed values with additional training. The model seems to have good abilities to generalize on the test dataset once training is completed. However, notice the RMSE values for each dataset and how they change with training. RMSE values are always decreasing for the training dataset, whereas RMSE values decrease initially for the test dataset but slowly begin to increase with additional training. This increase in RMSE for the test dataset is an early indication that overfitting may occur. Our first animation showed similar results. What would happen if we allowed training to progress up to 2000 training iterations? Over-training will improve predictive performance on the training dataset at the expense of performance on the test dataset. The model will be overfit and unable to generalize meaningful relationships among variables. The point is, always be cautious of models that have not been evaluated with an independent dataset.
+
+1 Rumelhart, D.E., Hinton, G.E., Williams, R.J. 1986. Learning representations by back-propagating errors. Nature. 323(6088):533-536.
+2 Venables, W.N., Ripley, B.D. 2002. Modern Applied Statistics with S, 4th ed. Springer, New York.
