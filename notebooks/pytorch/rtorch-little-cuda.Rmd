@@ -1,0 +1,25 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(reticulate)
+use_condaenv("pytorch")
+py_config()
+
+torch <- import("torch")
+# np <- import("numpy")
+np <- import("numpy", convert=FALSE)
+```
+
+
+```{r}
+torch$cuda$is_available()
+```
+
+```{r}
+a = torch$rand(5L, 4L)
+# a = a$cuda()
+print(a)
+```

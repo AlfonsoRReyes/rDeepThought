@@ -1,9 +1,11 @@
 ---
-title: "R Notebook"
+title: "pytorch linear regression"
 output: html_notebook
 ---
 
 https://github.com/SherlockLiao/pytorch-beginner/blob/master/01-Linear%20Regression/Linear_Regression.py
+
+* Model has 1000 epochs.
 
 ```{r}
 library(reticulate)
@@ -52,6 +54,7 @@ optimizer = optim.SGD(model.parameters(), lr=1e-4)
 
 # 开始训练
 num_epochs = 1000
+# num_epochs = 100
 for epoch in range(num_epochs):
     inputs = Variable(x_train)
     target = Variable(y_train)

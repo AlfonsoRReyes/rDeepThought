@@ -1,12 +1,14 @@
 ---
-title: "R Notebook"
+title: "rtorch-logistic-regression"
 output: html_notebook
 ---
 
 Source: https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/01-basics/logistic_regression/main.py
 
+https://github.com/longhowlam/ReticulateTestDrive/blob/master/pytorch.R
+
 ```{r}
-######################################################################################
+###############################################################################
 ## using pytorch in R via R reticulate
 
 library(reticulate)
