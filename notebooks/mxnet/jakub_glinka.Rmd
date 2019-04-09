@@ -5,12 +5,14 @@ output:
   html_notebook: default
 ---
 
+Article: http://www.jakubglinka.com/2017-02-21-neural_networks_part1/
+Code: https://github.com/jakubglinka/posts/blob/master/neural_networks_part1/neural_networks_part1.Rmd
+
 
 # Multilayer perceptron
 Multilayer perceptron (MLP) is the simplest feed-forward neural network. It mitigates the constraints of original perceptron that was able to learn only linearly separable patterns from the data. It achieves this by introducing at least one hidden layer in order to learn representation of the data that would enable linear separation.
 
-Article: http://www.jakubglinka.com/2017-02-21-neural_networks_part1/
-Code: https://github.com/jakubglinka/posts/blob/master/neural_networks_part1/neural_networks_part1.Rmd
+
 
 ## Requirements
 * Install `gganimate` first
@@ -45,6 +47,7 @@ Below is the example of code that configures perceptron with one hidden layer.
   require(gganimate)
   
   source("mult_ggplot.R")
+# https://github.com/jakubglinka/posts/blob/master/files/mult_ggplot.R
 ```
 
 ## Universal Approximation Theorem
@@ -365,9 +368,9 @@ tab <- res %>%
   
    
   
-  animation::ani.options(interval=2)
+  # animation::ani.options(interval=2)
   # gganimate(p, filename = "{{ site.url }}/img/mlp_evolution.gif", title_frame = FALSE)
-  gganimate(p, filename = "img/mlp_evolution.gif", title_frame = FALSE)
+  # gganimate(p, filename = "img/mlp_evolution.gif", title_frame = FALSE)
 ```
 
 
