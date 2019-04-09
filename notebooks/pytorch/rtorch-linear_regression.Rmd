@@ -146,7 +146,6 @@ print(x_train.shape)
 x_train = torch.from_numpy(x_train)
 y_train = torch.from_numpy(y_train)     
 
-print(x_train)
 print(y_train)
 ```
 
