@@ -1,0 +1,163 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+# load the Python environment
+reticulate::use_condaenv("pytorch37")
+reticulate::py_config()
+```
+
+```{python}
+# indicate path to PyQt plugins in the environment
+import os
+
+# this variable is important so RStudio doesn't crash
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Users/msfz751/Anaconda3/envs/pytorch37/Library/plugins/platforms'
+```
+
+```{python}
+import matplotlib.pyplot as plt
+import numpy as np
+
+# This import registers the 3D projection, but is otherwise unused.
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
+
+def midpoints(x):
+    sl = ()
+    for i in range(x.ndim):
+        x = (x[sl + np.index_exp[:-1]] + x[sl + np.index_exp[1:]]) / 2.0
+        sl += np.index_exp[:]
+    return x
+
+# prepare some coordinates, and attach rgb values to each
+r, g, b = np.indices((17, 17, 17)) / 16.0
+rc = midpoints(r)
+gc = midpoints(g)
+bc = midpoints(b)
+
+# define a sphere about [0.5, 0.5, 0.5]
+sphere = (rc - 0.5)**2 + (gc - 0.5)**2 + (bc - 0.5)**2 < 0.5**2
+
+# combine the color components
+colors = np.zeros(sphere.shape + (3,))
+colors[..., 0] = rc
+colors[..., 1] = gc
+colors[..., 2] = bc
+
+# and plot everything
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.voxels(r, g, b, sphere,
+          facecolors=colors,
+          edgecolors=np.clip(2*colors - 0.5, 0, 1),  # brighter
+          linewidth=0.5)
+ax.set(xlabel='r', ylabel='g', zlabel='b')
+
+plt.show()
+```
+
+
+
+```{python}
+# https://matplotlib.org/gallery/mplot3d/voxels_numpy_logo.html
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# This import registers the 3D projection, but is otherwise unused.
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
+
+def explode(data):
+    size = np.array(data.shape)*2
+    data_e = np.zeros(size - 1, dtype=data.dtype)
+    data_e[::2, ::2, ::2] = data
+    return data_e
+
+# build up the numpy logo
+n_voxels = np.zeros((4, 3, 4), dtype=bool)
+n_voxels[0, 0, :] = True
+n_voxels[-1, 0, :] = True
+n_voxels[1, 0, 2] = True
+n_voxels[2, 0, 1] = True
+facecolors = np.where(n_voxels, '#FFD65DC0', '#7A88CCC0')
+edgecolors = np.where(n_voxels, '#BFAB6E', '#7D84A6')
+filled = np.ones(n_voxels.shape)
+
+# upscale the above voxel image, leaving gaps
+filled_2 = explode(filled)
+fcolors_2 = explode(facecolors)
+ecolors_2 = explode(edgecolors)
+
+# Shrink the gaps
+x, y, z = np.indices(np.array(filled_2.shape) + 1).astype(float) // 2
+x[0::2, :, :] += 0.05
+y[:, 0::2, :] += 0.05
+z[:, :, 0::2] += 0.05
+x[1::2, :, :] += 0.95
+y[:, 1::2, :] += 0.95
+z[:, :, 1::2] += 0.95
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.voxels(x, y, z, filled_2, facecolors=fcolors_2, edgecolors=ecolors_2)
+
+plt.show()
+```
+
+
+
+```{python}
+# https://stackoverflow.com/a/49281004/5270873
+
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def cuboid_data2(o, size=(1,1,1)):
+    X = [[[0, 1, 0], [0, 0, 0], [1, 0, 0], [1, 1, 0]],
+         [[0, 0, 0], [0, 0, 1], [1, 0, 1], [1, 0, 0]],
+         [[1, 0, 1], [1, 0, 0], [1, 1, 0], [1, 1, 1]],
+         [[0, 0, 1], [0, 0, 0], [0, 1, 0], [0, 1, 1]],
+         [[0, 1, 0], [0, 1, 1], [1, 1, 1], [1, 1, 0]],
+         [[0, 1, 1], [0, 0, 1], [1, 0, 1], [1, 1, 1]]]
+    X = np.array(X).astype(float)
+    for i in range(3):
+        X[:,:,i] *= size[i]
+    X += np.array(o)
+    return X
+
+def plotCubeAt2(positions,sizes=None,colors=None, **kwargs):
+    if not isinstance(colors,(list,np.ndarray)): colors=["C0"]*len(positions)
+    if not isinstance(sizes,(list,np.ndarray)): sizes=[(1,1,1)]*len(positions)
+    g = []
+    for p,s,c in zip(positions,sizes,colors):
+        g.append( cuboid_data2(p, size=s) )
+    return Poly3DCollection(np.concatenate(g),  
+                            facecolors=np.repeat(colors,6), **kwargs)
+
+
+positions = [(-3,5,-2),(1,7,1)]
+sizes = [(4,5,3), (3,3,7)]
+colors = ["crimson","limegreen"]
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+ax.set_aspect('equal')
+
+pc = plotCubeAt2(positions,sizes,colors=colors, edgecolor="k")
+ax.add_collection3d(pc)    
+
+ax.set_xlim([-4,6])
+ax.set_ylim([4,13])
+ax.set_zlim([-3,9])
+
+plt.show()
+```

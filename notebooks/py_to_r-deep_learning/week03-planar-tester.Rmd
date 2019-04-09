@@ -1,0 +1,70 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Linux + Anaconda2 root
+
+```{r}
+# Linux
+# Use this in a Linux installation
+reticulate::use_condaenv("anaconda2")
+reticulate::py_config()
+```
+
+```{python}
+# Linux + Anaconda2 as default
+# this variable is important so RStudio doesn't crash
+import os
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/superuser/anaconda2/plugins/platforms'
+```
+
+```{r}
+library(reticulate)
+
+# import Python script
+import_from_path("planar_utils", path = ".", convert = TRUE)
+import_from_path("testCases", path = ".", convert = TRUE)
+```
+
+```{python}
+# Package imports
+import numpy as np
+import matplotlib.pyplot as plt
+from testCases import *
+import sklearn
+import sklearn.datasets
+import sklearn.linear_model
+from planar_utils import plot_decision_boundary, sigmoid, load_planar_dataset, load_extra_datasets
+
+# %matplotlib inline
+
+np.random.seed(1) # set a seed so that the results are consistent
+```
+
+```{python}
+# Datasets
+noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
+```
+
+
+```{python}
+# test that one dataset works
+X, Y = noisy_circles
+```
+
+```{python}
+print(X.shape)
+print(Y.shape)
+```
+
+```{python}
+X, Y = load_planar_dataset()
+```
+
+```{python}
+# Visualize the data:
+plt.scatter(X[0, :], X[1, :], c=Y, s=40, cmap=plt.cm.Spectral);
+plt.show()
+```
+

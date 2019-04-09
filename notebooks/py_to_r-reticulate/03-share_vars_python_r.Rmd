@@ -1,0 +1,31 @@
+---
+title: "Sharing variables between Python and R"
+output: html_notebook
+---
+
+Pandas is installed by default in the `base` environment.
+For other environments, `pandas` has to be installed manually.
+
+## Read file using Python
+
+```{python}
+import pandas
+
+flights = pandas.read_csv("flights.csv")
+flights = flights[flights["DESTINATION_AIRPORT"] == "ORD"]
+flights = flights[["AIRLINE", "DEPARTURE_DELAY", "ARRIVAL_DELAY"]]
+flights = flights.dropna()
+print(flights.head())
+```
+
+## Plot data with R
+
+```{r}
+library(reticulate)
+library(ggplot2)
+
+ggplot(py$flights, aes(AIRLINE, ARRIVAL_DELAY)) +
+    geom_point() +
+    geom_jitter()
+```
+

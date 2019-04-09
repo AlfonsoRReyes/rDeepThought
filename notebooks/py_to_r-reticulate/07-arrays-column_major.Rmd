@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Array created in Python as column-major
+
+```{r}
+library(reticulate)
+
+np <- import("numpy", convert = FALSE)
+
+(x.py.cm <- np$reshape(np$arange(1, 25), c(4L, 3L, 2L), "F"))
+```
+
+> This is how column-major looks in R printing.
+
+```{r}
+(y.py.cm <- py_to_r(x.py.cm))
+```
+
+> Let's generate the same array in R, which is going to be, by default, column-major.
+
+## Create an array in R (it will be by default column-major)
+
+```{r}
+(z.r.cm <- array(1:25, dim = c(4, 3, 2)))
+```
+
+> Now, if both arrays are the same, the difference must be zero:
+
+```{r}
+y.py.cm - z.r.cm
+```
+
+## Create a column-major array using `array_reshape`
+
+```{r}
+library(reticulate)
+
+array_reshape(1:24, dim = c(4,3,2), order = "F")
+```
+

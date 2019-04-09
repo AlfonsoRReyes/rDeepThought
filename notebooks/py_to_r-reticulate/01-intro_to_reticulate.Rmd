@@ -1,0 +1,35 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(reticulate)
+
+os <- import("os")
+os$chdir("data")
+os$getcwd()
+```
+
+
+## Object conversion
+
+```{r}
+# import numpy and specify no automatic Python to R conversion
+np <- import("numpy", convert = FALSE)
+
+# do some array manipulations with NumPy
+a <- np$array(c(1:4))
+a
+sum <- a$cumsum()
+
+# convert to R explicitly at the end
+py_to_r(sum)
+```
+
+
+```{r}
+a <- np_array(c(1:8), dtype = "float16")
+print(a)
+# a <- np_array(c(1:8), dim = c(2,4), order = "C")
+```

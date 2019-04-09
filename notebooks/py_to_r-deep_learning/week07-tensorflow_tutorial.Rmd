@@ -1,0 +1,49 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(reticulate)
+
+reticulate::use_condaenv("r-tensorflow")
+```
+
+
+```{python}
+import math
+import numpy as np
+import h5py
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow.python.framework import ops
+```
+
+The original r-tensorflow does not come with `matplotlib`.
+We will have to go back and install it in the environment.
+
+      ModuleNotFoundError: No module named 'matplotlib'
+      
+```{r}
+reticulate::conda_list()
+```
+     
+```{r}
+reticulate::py_config()
+# reticulate::py_available()
+```
+     
+```{python}
+import os
+print(os.system("conda env list"))
+```
+      
+```{python}
+print(os.getcwd())
+```
+
+```{python}
+import os
+os.system("conda install matplotlib")
+```

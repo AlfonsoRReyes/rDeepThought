@@ -1,0 +1,186 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+https://rstudio.github.io/reticulate/articles/arrays.html
+
+```{r}
+library(reticulate)
+
+np <- import("numpy", convert=FALSE)
+(x <- np$arange(1, 9)$reshape(2L, 2L, 2L))
+```
+
+
+```{r}
+# this is a row-major array
+(y <- py_to_r(x))
+```
+
+## another example
+
+```{r}
+np <- import("numpy", convert=FALSE)
+(x <- np$reshape(np$arange(1, 25), c(4L, 3L, 2L)))
+```
+
+
+```{r}
+(y <- py_to_r(x))
+```
+
+```{r}
+np$take(x, 0L, 2L)
+```
+
+
+
+```{r}
+library(reticulate)
+np <- import("numpy", convert=FALSE)
+
+p432 <- np$array(c(
+    c(
+        c( 1, 13),
+        c( 5, 17),
+        c( 9, 21)),
+
+       c(
+        c( 2, 14),
+        c( 6, 18),
+        c(10, 22)),
+
+       c(
+        c( 3, 15),
+        c( 7, 19),
+        c(11, 23)),
+
+       c(
+        c( 4, 16),
+        c( 8, 20),
+        c(12, 24))))
+p432
+array(py_to_r(p432), c(4,3,2))
+
+```
+
+
+```{r}
+x = np$array(c(c(
+        c( 1, 13),
+        c( 5, 17),
+        c( 9, 21)),
+
+       c(c( 2, 14),
+        c( 6, 18),
+        c(10, 22)),
+
+       c(c( 3, 15),
+        c( 7, 19),
+        c(11, 23)),
+
+       c(c( 4, 16),
+        c( 8, 20),
+        c(12, 24))))
+
+x$shape
+```
+
+
+```{r}
+# Python array
+## array([[[ 1, 13],
+##         [ 5, 17],
+##         [ 9, 21]],
+##
+##        [[ 2, 14],
+##         [ 6, 18],
+##         [10, 22]],
+##
+##        [[ 3, 15],
+##         [ 7, 19],
+##         [11, 23]],
+##
+##        [[ 4, 16],
+##         [ 8, 20],
+##         [12, 24]]])
+
+array(
+    cbind(
+        c(
+        c( 1, 13),
+        c( 5, 17),
+        c( 9, 21)),
+
+       c(
+        c( 2, 14),
+        c( 6, 18),
+        c(10, 22)),
+
+       c(
+        c( 3, 15),
+        c( 7, 19),
+        c(11, 23)),
+
+       c(
+        c( 4, 16),
+        c( 8, 20),
+        c(12, 24))),
+    
+    dim = c(4,3,2))
+
+```
+
+```{r}
+array(rbind(
+    cbind(
+        c( 1, 13),
+        c( 5, 17),
+        c( 9, 21)),
+
+    cbind(
+        c( 2, 14),
+        c( 6, 18),
+        c(10, 22)),
+
+    cbind(
+        c( 3, 15),
+        c( 7, 19),
+        c(11, 23)),
+
+    cbind(
+        c( 4, 16),
+        c( 8, 20),
+        c(12, 24))
+),
+    dim = c(4,3,2))
+```
+
+```{r}
+array(
+    rbind(
+    c(
+            c( 1, 13),
+            c( 5, 17),
+            c( 9, 21)),
+    
+    c(
+            c( 2, 14),
+            c( 6, 18),
+            c(10, 22)),
+    
+    c(
+            c( 3, 15),
+            c( 7, 19),
+            c(11, 23)),
+    
+    c(
+            c( 4, 16),
+            c( 8, 20),
+            c(12, 24))
+    ),
+    dim = c(4,3,2)
+)
+```
+

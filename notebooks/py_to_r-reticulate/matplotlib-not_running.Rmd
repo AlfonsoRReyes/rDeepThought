@@ -1,0 +1,333 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+These Latex with matplotlib plot do not work.
+
+## Linux + Anaconda2 root
+
+```{r}
+# Linux
+# Use this in a Linux installation
+reticulate::use_condaenv("anaconda2")
+reticulate::py_config()
+```
+
+```{python}
+# Linux + Anaconda2 as default
+# this variable is important so RStudio doesn't crash
+import os
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/superuser/anaconda2/plugins/platforms'
+```
+
+## Windows + `pytorch` environment
+
+```{r}
+reticulate::use_condaenv("pytorch37")
+reticulate::py_config()
+```
+
+```{python}
+import os
+# this variable is important so RStudio doesn't crash
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Users/msfz751/Anaconda3/envs/pytorch37/Library/plugins/platforms'
+```
+
+```{python}
+# https://www.kaggle.com/sskiing/matplotlib-showcase-examples
+# http://matplotlib.org/examples/showcase/bachelors_degrees_by_gender.html
+
+import matplotlib.pyplot as plt
+from matplotlib.mlab import csv2rec
+from matplotlib.cbook import get_sample_data
+
+fname = get_sample_data('percent_bachelors_degrees_women_usa.csv')
+gender_degree_data = csv2rec(fname)
+
+# These are the colors that will be used in the plot
+color_sequence = ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c',
+                  '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5',
+                  '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f',
+                  '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
+
+# You typically want your plot to be ~1.33x wider than tall. This plot
+# is a rare exception because of the number of lines being plotted on it.
+# Common sizes: (10, 7.5) and (12, 9)
+fig, ax = plt.subplots(1, 1, figsize=(12, 14),dpi=244)
+
+# Remove the plot frame lines. They are unnecessary here.
+ax.spines['top'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+# Ensure that the axis ticks only show up on the bottom and left of the plot.
+# Ticks on the right and top of the plot are generally unnecessary.
+ax.get_xaxis().tick_bottom()
+ax.get_yaxis().tick_left()
+
+fig.subplots_adjust(left=.06, right=.75, bottom=.02, top=.94)
+# Limit the range of the plot to only where the data is.
+# Avoid unnecessary whitespace.
+ax.set_xlim(1969.5, 2011.1)
+ax.set_ylim(-0.25, 90)
+
+# Make sure your axis ticks are large enough to be easily read.
+# You don't want your viewers squinting to read your plot.
+plt.xticks(range(1970, 2011, 10), fontsize=14)
+plt.yticks(range(0, 91, 10), fontsize=14)
+ax.xaxis.set_major_formatter(plt.FuncFormatter('{:.0f}'.format))
+ax.yaxis.set_major_formatter(plt.FuncFormatter('{:.0f}%'.format))
+
+# Provide tick lines across the plot to help your viewers trace along
+# the axis ticks. Make sure that the lines are light and small so they
+# don't obscure the primary data lines.
+plt.grid(True, 'major', 'y', ls='--', lw=.5, c='k', alpha=.3)
+
+# Remove the tick marks; they are unnecessary with the tick lines we just
+# plotted.
+plt.tick_params(axis='both', which='both', bottom='off', top='off',
+                labelbottom='on', left='off', right='off', labelleft='on')
+
+# Now that the plot is prepared, it's time to actually plot the data!
+# Note that I plotted the majors in order of the highest % in the final year.
+majors = ['Health Professions', 'Public Administration', 'Education',
+          'Psychology', 'Foreign Languages', 'English',
+          'Communications\nand Journalism', 'Art and Performance', 'Biology',
+          'Agriculture', 'Social Sciences and History', 'Business',
+          'Math and Statistics', 'Architecture', 'Physical Sciences',
+          'Computer Science', 'Engineering']
+
+y_offsets = {'Foreign Languages': 0.5, 'English': -0.5,
+             'Communications\nand Journalism': 0.75,
+             'Art and Performance': -0.25, 'Agriculture': 1.25,
+             'Social Sciences and History': 0.25, 'Business': -0.75,
+             'Math and Statistics': 0.75, 'Architecture': -0.75,
+             'Computer Science': 0.75, 'Engineering': -0.25}
+
+for rank, column in enumerate(majors):
+    # Plot each line separately with its own color.
+    column_rec_name = column.replace('\n', '_').replace(' ', '_').lower()
+
+    line = plt.plot(gender_degree_data.year,
+                    gender_degree_data[column_rec_name],
+                    lw=2.5,
+                    color=color_sequence[rank])
+
+    # Add a text label to the right end of every line. Most of the code below
+    # is adding specific offsets y position because some labels overlapped.
+    y_pos = gender_degree_data[column_rec_name][-1] - 0.5
+
+    if column in y_offsets:
+        y_pos += y_offsets[column]
+
+    # Again, make sure that all labels are large enough to be easily read
+    # by the viewer.
+    plt.text(2011.5, y_pos, column, fontsize=14, color=color_sequence[rank])
+
+# Make the title big enough so it spans the entire plot, but don't make it
+# so big that it requires two lines to show.
+
+# Note that if the title is descriptive enough, it is unnecessary to include
+# axis labels; they are self-evident, in this plot's case.
+fig.suptitle('Percentage of Bachelor\'s degrees conferred to women in '
+             'the U.S.A. by major (1970-2011)\n', fontsize=18, ha='center')
+
+# Finally, save the figure as a PNG.
+# You can also save it as a PDF, JPEG, etc.
+# Just change the file extension in this call.
+# plt.savefig('percent-bachelors-degrees-women-usa.png', bbox_inches='tight')
+plt.show()
+```
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+plt.rc('text', usetex=True)
+
+# interface tracking profiles
+N = 500
+delta = 0.6
+X = np.linspace(-1, 1, N)
+plt.plot(X, (1 - np.tanh(4 * X / delta)) / 2,    # phase field tanh profiles
+         X, (1.4 + np.tanh(4 * X / delta)) / 4, "C2",  # composition profile
+         X, X < 0, 'k--')                        # sharp interface
+
+# legend
+plt.legend(('phase field', 'level set', 'sharp interface'),
+           shadow=True, loc=(0.01, 0.48), handlelength=1.5, fontsize=16)
+
+# the arrow
+plt.annotate("", xy=(-delta / 2., 0.1), xycoords='data',
+             xytext=(delta / 2., 0.1), textcoords='data',
+             arrowprops=dict(arrowstyle="<->", connectionstyle="arc3"))
+plt.text(0, 0.1, r'$\delta$',
+         {'color': 'k', 'fontsize': 24, 'ha': 'center', 'va': 'center',
+          'bbox': dict(boxstyle="round", fc="w", ec="k", pad=0.2)})
+
+# Use tex in labels
+plt.xticks((-1, 0, 1), ('$-1$', r'$\pm 0$', '$+1$'), color='k', size=20)
+
+# Left Y-axis labels, combine math mode and text mode
+plt.ylabel(r'\bf{phase field} $\phi$', {'color': 'C0', 'fontsize': 20})
+plt.yticks((0, 0.5, 1), (r'\bf{0}', r'\bf{.5}', r'\bf{1}'), color='k', size=20)
+
+# Right Y-axis labels
+plt.text(1.02, 0.5, r"\bf{level set} $\phi$", {'color': 'C2', 'fontsize': 20},
+         horizontalalignment='left',
+         verticalalignment='center',
+         rotation=90,
+         clip_on=False,
+         transform=plt.gca().transAxes)
+
+# Use multiline environment inside a `text`.
+# level set equations
+eq1 = r"\begin{eqnarray*}" + \
+      r"|\nabla\phi| &=& 1,\\" + \
+      r"\frac{\partial \phi}{\partial t} + U|\nabla \phi| &=& 0 " + \
+      r"\end{eqnarray*}"
+plt.text(1, 0.9, eq1, {'color': 'C2', 'fontsize': 18}, va="top", ha="right")
+
+# phase field equations
+eq2 = r'\begin{eqnarray*}' + \
+      r'\mathcal{F} &=& \int f\left( \phi, c \right) dV, \\ ' + \
+      r'\frac{ \partial \phi } { \partial t } &=& -M_{ \phi } ' + \
+      r'\frac{ \delta \mathcal{F} } { \delta \phi }' + \
+      r'\end{eqnarray*}'
+plt.text(0.18, 0.18, eq2, {'color': 'C0', 'fontsize': 16})
+
+plt.text(-1, .30, r'gamma: $\gamma$', {'color': 'r', 'fontsize': 20})
+plt.text(-1, .18, r'Omega: $\Omega$', {'color': 'b', 'fontsize': 20})
+
+plt.show()
+```
+
+
+```{python}
+# https://matplotlib.org/gallery/text_labels_and_annotations/mathtext_examples.html#sphx-glr-gallery-text-labels-and-annotations-mathtext-examples-py
+
+import matplotlib.pyplot as plt
+import subprocess
+import sys
+import re
+
+# Selection of features following "Writing mathematical expressions" tutorial
+mathtext_titles = {
+    0: "Header demo",
+    1: "Subscripts and superscripts",
+    2: "Fractions, binomials and stacked numbers",
+    3: "Radicals",
+    4: "Fonts",
+    5: "Accents",
+    6: "Greek, Hebrew",
+    7: "Delimiters, functions and Symbols"}
+n_lines = len(mathtext_titles)
+
+# Randomly picked examples
+mathext_demos = {
+    0: r"$W^{3\beta}_{\delta_1 \rho_1 \sigma_2} = "
+    r"U^{3\beta}_{\delta_1 \rho_1} + \frac{1}{8 \pi 2} "
+    r"\int^{\alpha_2}_{\alpha_2} d \alpha^\prime_2 \left[\frac{ "
+    r"U^{2\beta}_{\delta_1 \rho_1} - \alpha^\prime_2U^{1\beta}_"
+    r"{\rho_1 \sigma_2} }{U^{0\beta}_{\rho_1 \sigma_2}}\right]$",
+
+    1: r"$\alpha_i > \beta_i,\ "
+    r"\alpha_{i+1}^j = {\rm sin}(2\pi f_j t_i) e^{-5 t_i/\tau},\ "
+    r"\ldots$",
+
+    2: r"$\frac{3}{4},\ \binom{3}{4},\ \stackrel{3}{4},\ "
+    r"\left(\frac{5 - \frac{1}{x}}{4}\right),\ \ldots$",
+
+    3: r"$\sqrt{2},\ \sqrt[3]{x},\ \ldots$",
+
+    4: r"$\mathrm{Roman}\ , \ \mathit{Italic}\ , \ \mathtt{Typewriter} \ "
+    r"\mathrm{or}\ \mathcal{CALLIGRAPHY}$",
+
+    5: r"$\acute a,\ \bar a,\ \breve a,\ \dot a,\ \ddot a, \ \grave a, \ "
+    r"\hat a,\ \tilde a,\ \vec a,\ \widehat{xyz},\ \widetilde{xyz},\ "
+    r"\ldots$",
+
+    6: r"$\alpha,\ \beta,\ \chi,\ \delta,\ \lambda,\ \mu,\ "
+    r"\Delta,\ \Gamma,\ \Omega,\ \Phi,\ \Pi,\ \Upsilon,\ \nabla,\ "
+    r"\aleph,\ \beth,\ \daleth,\ \gimel,\ \ldots$",
+
+    7: r"$\coprod,\ \int,\ \oint,\ \prod,\ \sum,\ "
+    r"\log,\ \sin,\ \approx,\ \oplus,\ \star,\ \varpropto,\ "
+    r"\infty,\ \partial,\ \Re,\ \leftrightsquigarrow, \ \ldots$"}
+
+
+def doall():
+    # Colors used in mpl online documentation.
+    mpl_blue_rvb = (191. / 255., 209. / 256., 212. / 255.)
+    mpl_orange_rvb = (202. / 255., 121. / 256., 0. / 255.)
+    mpl_grey_rvb = (51. / 255., 51. / 255., 51. / 255.)
+
+    # Creating figure and axis.
+    plt.figure(figsize=(6, 7))
+    plt.axes([0.01, 0.01, 0.98, 0.90], facecolor="white", frameon=True)
+    plt.gca().set_xlim(0., 1.)
+    plt.gca().set_ylim(0., 1.)
+    plt.gca().set_title("Matplotlib's math rendering engine",
+                        color=mpl_grey_rvb, fontsize=14, weight='bold')
+    plt.gca().set_xticklabels("", visible=False)
+    plt.gca().set_yticklabels("", visible=False)
+
+    # Gap between lines in axes coords
+    line_axesfrac = (1. / (n_lines))
+
+    # Plotting header demonstration formula
+    full_demo = mathext_demos[0]
+    plt.annotate(full_demo,
+                 xy=(0.5, 1. - 0.59 * line_axesfrac),
+                 xycoords='data', color=mpl_orange_rvb, ha='center',
+                 fontsize=20)
+
+    # Plotting features demonstration formulae
+    for i_line in range(1, n_lines):
+        baseline = 1 - (i_line) * line_axesfrac
+        baseline_next = baseline - line_axesfrac
+        title = mathtext_titles[i_line] + ":"
+        fill_color = ['white', mpl_blue_rvb][i_line % 2]
+        plt.fill_between([0., 1.], [baseline, baseline],
+                         [baseline_next, baseline_next],
+                         color=fill_color, alpha=0.5)
+        plt.annotate(title,
+                     xy=(0.07, baseline - 0.3 * line_axesfrac),
+                     xycoords='data', color=mpl_grey_rvb, weight='bold')
+        demo = mathext_demos[i_line]
+        plt.annotate(demo,
+                     xy=(0.05, baseline - 0.75 * line_axesfrac),
+                     xycoords='data', color=mpl_grey_rvb,
+                     fontsize=16)
+
+    for i in range(n_lines):
+        s = mathext_demos[i]
+        print(i, s)
+    plt.show()
+
+
+if '--latex' in sys.argv:
+    # Run: python mathtext_examples.py --latex
+    # Need amsmath and amssymb packages.
+    fd = open("mathtext_examples.ltx", "w")
+    fd.write("\\documentclass{article}\n")
+    fd.write("\\usepackage{amsmath, amssymb}\n")
+    fd.write("\\begin{document}\n")
+    fd.write("\\begin{enumerate}\n")
+
+    for i in range(n_lines):
+        s = mathext_demos[i]
+        s = re.sub(r"(?<!\\)\$", "$$", s)
+        fd.write("\\item %s\n" % s)
+
+    fd.write("\\end{enumerate}\n")
+    fd.write("\\end{document}\n")
+    fd.close()
+
+    subprocess.call(["pdflatex", "mathtext_examples.ltx"])
+else:
+    doall()
+```
+
+

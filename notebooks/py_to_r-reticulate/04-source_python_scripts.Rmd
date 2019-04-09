@@ -1,0 +1,33 @@
+---
+title: "Sourcing a Python script"
+output: html_notebook
+---
+
+## 1. Source flights.py
+
+```{r}
+# Use this in a Linux installation
+reticulate::use_condaenv("anaconda2")
+reticulate::py_config()
+```
+
+```{r}
+library(reticulate)
+source_python("flights.py")
+flights <- read_flights("flights.csv")
+
+library(ggplot2)
+
+ggplot(flights, aes(AIRLINE, ARRIVAL_DELAY)) +
+    geom_point() +
+    geom_jitter()
+```
+
+## 2. Source functions.py
+
+```{r}
+# will call script functions.py
+source_python('functions.py')
+add(5, 10)
+```
+

@@ -1,0 +1,67 @@
+---
+title: "Test function library and dataset works"
+output: html_notebook
+---
+
+## Linux + Anaconda2 root
+
+```{r}
+# Linux
+# Use this in a Linux installation
+reticulate::use_condaenv("anaconda2")
+reticulate::py_config()
+```
+
+```{python}
+# Linux + Anaconda2 as default
+# this variable is important so RStudio doesn't crash
+import os
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = '/home/superuser/anaconda2/plugins/platforms'
+```
+
+
+```{r}
+library(reticulate)
+
+# import Python script
+import_from_path("lr_utils", path = ".", convert = TRUE)
+```
+
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import h5py
+import scipy
+from PIL import Image
+from scipy import ndimage
+from lr_utils import load_dataset
+```
+
+```{python}
+# Loading the data (cat/non-cat)
+train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset()
+```
+
+
+```{python}
+train_dataset = h5py.File('datasets/train_catvnoncat.h5', "r")
+train_set_x_orig = np.array(train_dataset["train_set_x"][:]) # your train set features
+```
+
+```{python}
+train_dataset["train_set_x"]
+```
+
+```{python}
+# Requires setting the PyQt plugin folder path
+# Example of a picture
+index = 25
+plt.imshow(train_set_x_orig[index])
+plt.show()
+```
+
+```{python}
+print ("y = " + str(train_set_y[:, index]) + ", it's a '" + classes[np.squeeze(train_set_y[:, index])].decode("utf-8") +  "' picture.")
+```
+
