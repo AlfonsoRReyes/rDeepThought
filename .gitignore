@@ -14,3 +14,18 @@ inst/notebooks/mxnet/tmp/submission\.csv
 !docs/*.html
 
 *.pth
+
+
+*.ini
+
+notebooks/tint_cache/
+
+notebooks/tint_files/
+
+*.log
+
+notebooks/py_to_r-reticulate/__pycache__/
+
+notebooks/py_to_r-deep_learning/__pycache__/
+
+*.pyc
