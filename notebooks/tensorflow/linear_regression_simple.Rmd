@@ -4,6 +4,12 @@ output: html_notebook
 ---
 
 ```{r}
+library(reticulate)
+use_condaenv("r-tensorflow")
+```
+
+
+```{r}
 library(tensorflow)
 
 # Create 100 phony x, y data points, y = x * 0.1 + 0.3

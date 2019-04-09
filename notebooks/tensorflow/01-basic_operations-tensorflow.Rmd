@@ -9,6 +9,9 @@ https://github.com/aymericdamien/TensorFlow-Examples/blob/master/notebooks/1_Int
 library(tensorflow)
 ```
 
+```{r}
+reticulate::use_condaenv("r-tensorflow")
+```
 
 ```{r}
 # Basic constant operations
